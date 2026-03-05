@@ -45,8 +45,8 @@ public class Sprite{
 		}
 
 		length = frames.Count;
-		if(length < 8) slowness = 4;
-		else slowness = 2;
+		if(length < 8) slowness = 1;
+		else if(length <= 5) slowness = 1; 
 	}
 
 	public Sprite(string[] filepaths, int restingframe_idx){
@@ -62,6 +62,13 @@ public class Sprite{
 		length = frames.Count;
 		if(length < 8) slowness = 4;
 		if(restingframe_idx == -1) this.restingframe_idx = length-1;
+	}
+
+
+	public void Trigger(){
+		_isAnimationFinished = false;
+		index = 0;
+		isAnimationTriggered = true;
 	}
 
 	public void Trigger(Action NextFunction){

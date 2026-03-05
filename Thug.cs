@@ -36,7 +36,7 @@ public class Thug : Entity{
 	float aiming_rotation;
 
 	public void Action(){
-		float distance = (float)Math.Sqrt(Math.Pow(this.r.X - local_player.r.X, 2) + Math.Pow(this.r.Y - local_player.r.Y, 2));
+		
 		PointF difference = new PointF(this.r.Y-local_player.r.Y,this.r.X-local_player.r.X);
 		aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
 
@@ -45,24 +45,38 @@ public class Thug : Entity{
 			speed *= -1;
 		}
 
-		if(isActionInProgress) return;
-		if(distance > 300){
-			speed += 2;
+		if(isActionInProgress){
+			attackTimer+=-0.052f;
+			if(attackTimer <= 0){
+				isActionInProgress = false;
+			}else{
+				return;
+			}
+		}
+
+		float dx = this.r.X - local_player.r.X;
+		float dy = this.r.Y - local_player.r.Y;
+
+		float distance = (float)(dx*dx+dy*dy);
+		if(distance > 90000){
+			if(_sprite != walk) _sprite = walk;
+			speed = Math.Clamp(speed + 1, -4, 4);
 		}else{
-			_sprite = shoot;
+			if(_sprite != shoot) _sprite = shoot;
 			isActionInProgress = true;
-			new Task(() => {sprite.Trigger(endAttack);}).Start();
+			attackTimer = 1;
+			_sprite.Trigger();
 			speed = 0;
 		}
 	}
 
+	float attackTimer = 1;
 	public void endAttack(){
 		isActionInProgress = false;
 	}
 
 	public override void Update(){
 		Action();
-		if(isActionInProgress == false) _sprite = UpdateSprite();
 
 		PointF movement = Scalar2Vect_Speed(rotation, speed); 
 		r.Location = new PointF(movement.X + r.X, movement.Y + r.Y);
@@ -72,8 +86,6 @@ public class Thug : Entity{
 		if(this.rotation < aiming_rotation) this.rotation = (this.rotation+5)%360;
 		if(this.rotation > aiming_rotation) this.rotation = (this.rotation-5)%360;
 
-		if(speed > 4) speed = 4;
-		if(speed < -4) speed = -4;
 		speed *= (float)0.7;
 	}
 }

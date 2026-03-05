@@ -24,10 +24,10 @@ public class Environment{
 
 		foreach(var e in entities)
 			e.Update();
-
+		/*	
 		DoCollisionVerifications(objects, objects);
 		DoCollisionVerifications(objects, entities);
-		DoCollisionVerifications(entities, entities);
+		DoCollisionVerifications(entities, entities);*/
 	}
 
 	private void DoCollisionVerifications(IEnumerable<Object> list1, IEnumerable<Object> list2){

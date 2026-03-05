@@ -68,8 +68,12 @@ public class Player : Entity{
 	}
 
 	public void HandleInput(){
-		if(isActionInProgress) return;
 		
+		if( (GetAsyncKeyState((int)Keys.Q) & 0x8000) != 0 ) rotation = (rotation-7)%360;
+		if( (GetAsyncKeyState((int)Keys.D) & 0x8000) != 0 ) rotation = (rotation+7)%360; 
+		
+		if(isActionInProgress) return;
+
 		if((GetAsyncKeyState((int)Keys.Space) & 0x8000)!=0){
 			startAttack();
 			return;
@@ -77,8 +81,7 @@ public class Player : Entity{
 
 		if( (GetAsyncKeyState((int)Keys.Z) & 0x8000) != 0 ) speed += 3;
 		if( (GetAsyncKeyState((int)Keys.S) & 0x8000) != 0 ) speed -= 3;
-		if( (GetAsyncKeyState((int)Keys.Q) & 0x8000) != 0 ) rotation = (rotation-6)%360;
-		if( (GetAsyncKeyState((int)Keys.D) & 0x8000) != 0 ) rotation = (rotation+6)%360; 
+		speed =Math.Clamp(speed, -5, 5);
 	}
 
 	private Sprite UpdateSprite(){
@@ -95,8 +98,6 @@ public class Player : Entity{
 		PointF movement = Scalar2Vect_Speed(rotation, speed); 
 		r.Location = new PointF(movement.X + r.X, movement.Y + r.Y);
 		
-		if(speed > 4) speed = 4;
-		if(speed < -4) speed = -4;
 		speed *= (float)0.7;
 	}
 }
