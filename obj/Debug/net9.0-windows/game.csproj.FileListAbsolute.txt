@@ -1,0 +1,14 @@
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.GeneratedMSBuildEditorConfig.editorconfig
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.AssemblyInfoInputs.cache
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.AssemblyInfo.cs
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.csproj.CoreCompileInputs.cache
+C:\MYHOME\HEL\Csharp\game\bin\Debug\net9.0-windows\game.exe
+C:\MYHOME\HEL\Csharp\game\bin\Debug\net9.0-windows\game.deps.json
+C:\MYHOME\HEL\Csharp\game\bin\Debug\net9.0-windows\game.runtimeconfig.json
+C:\MYHOME\HEL\Csharp\game\bin\Debug\net9.0-windows\game.dll
+C:\MYHOME\HEL\Csharp\game\bin\Debug\net9.0-windows\game.pdb
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.dll
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\refint\game.dll
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.pdb
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\game.genruntimeconfig.cache
+C:\MYHOME\HEL\Csharp\game\obj\Debug\net9.0-windows\ref\game.dll
