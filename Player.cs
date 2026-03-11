@@ -55,6 +55,7 @@ public class Player : Entity{
 		isActionInProgress = true;
 		if(countWeapon > 0){
 			selectedWeapon.Shoot();
+			HitscanCheck(this.GetCenter(), 600);   
 			_sprite = fire;
 		}else{
 			attackTimer = 1;

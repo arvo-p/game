@@ -29,7 +29,6 @@ public class Object{
 	}
 
 	public void Collision(){
-
 	}
 
 	public virtual void Update(){
@@ -42,5 +41,13 @@ public class Object{
 		PointF movement = Scalar2Vect_Speed(rotation, speed); 
 		env.Move(this, movement);
 		speed *= (float)0.7;
+	}
+
+	public PointF GetCenter(){
+		return new PointF(r.X + r.Width/2, r.Y + r.Height/2);
+	}
+
+	public virtual void IsHit(){
+
 	}
 }

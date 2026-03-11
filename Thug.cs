@@ -34,6 +34,10 @@ public class Thug : Entity{
 	bool isActionInProgress = false;
 	float aiming_rotation;
 
+	public override void IsHit(){
+		isDead = true;
+	}
+	
 	public void Action(){
 		
 		PointF difference = new PointF(this.r.Y-local_player.r.Y,this.r.X-local_player.r.X);
