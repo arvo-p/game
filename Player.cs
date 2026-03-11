@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 
 public class Player : Entity{
 	
-	Environment env;
 
 	[DllImport("user32.dll")]
     private static extern short GetAsyncKeyState(int vKey);
@@ -32,7 +31,7 @@ public class Player : Entity{
 		_spriteNext = stand;
 
 		r.Location = new Point(0, 0);
-		r.Size = new Size(75, 75);
+		r.Size = new Size(74, 74);
 		
 		weapons.Add(
 			(Weapon)env.weaponFootprints.list[3].Clone(this)
@@ -51,37 +50,41 @@ public class Player : Entity{
 	}
 
 	bool isActionInProgress = false;
+	float attackTimer = 0;
 	public void startAttack(){
 		isActionInProgress = true;
 		if(countWeapon > 0){
 			selectedWeapon.Shoot();
 			_sprite = fire;
 		}else{
-			new Task(() => {sprite.Trigger(endAttack);}).Start();
+			attackTimer = 1;
+			sprite.Trigger();
 			_sprite = meleethrow;
 		}
 		return;
 	}
 
-	public void endAttack(){
-		isActionInProgress = false;
-	}
-
 	public void HandleInput(){
-		
 		if( (GetAsyncKeyState((int)Keys.Q) & 0x8000) != 0 ) rotation = (rotation-7)%360;
 		if( (GetAsyncKeyState((int)Keys.D) & 0x8000) != 0 ) rotation = (rotation+7)%360; 
 		
-		if(isActionInProgress) return;
+		if(isActionInProgress){
+			if(selectedWeapon.sprite.isAnimationFinished){
+				selectedWeapon.EndShoot();
+				isActionInProgress = false;
+			}else return;
+		}
 
 		if((GetAsyncKeyState((int)Keys.Space) & 0x8000)!=0){
 			startAttack();
+			/* TO-DO : auto-aim nearest enemy
+			 */
 			return;
 		}
 
 		if( (GetAsyncKeyState((int)Keys.Z) & 0x8000) != 0 ) speed += 3;
 		if( (GetAsyncKeyState((int)Keys.S) & 0x8000) != 0 ) speed -= 3;
-		speed =Math.Clamp(speed, -5, 5);
+		speed = Math.Clamp(speed, -15, 15);
 	}
 
 	private Sprite UpdateSprite(){
@@ -94,10 +97,5 @@ public class Player : Entity{
 		HandleInput();
 		if(isActionInProgress == false)
 			_sprite = UpdateSprite();
-
-		PointF movement = Scalar2Vect_Speed(rotation, speed); 
-		r.Location = new PointF(movement.X + r.X, movement.Y + r.Y);
-		
-		speed *= (float)0.7;
 	}
 }

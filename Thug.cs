@@ -5,7 +5,6 @@ public class Thug : Entity{
 	public Sprite stand;
 	public Sprite dead;
 
-	Environment env;
 	Player local_player;
 
 	public Thug(Environment env){
@@ -16,7 +15,7 @@ public class Thug : Entity{
 		_sprite = stand;
 
 		r.Location = new Point(300, 300);
-		r.Size = new Size(75, 75);
+		r.Size = new Size(72, 72);
 	}
 
 	void LoadSprites(){
@@ -78,14 +77,9 @@ public class Thug : Entity{
 	public override void Update(){
 		Action();
 
-		PointF movement = Scalar2Vect_Speed(rotation, speed); 
-		r.Location = new PointF(movement.X + r.X, movement.Y + r.Y);
-
 		this.rotation = aiming_rotation;
 
 		if(this.rotation < aiming_rotation) this.rotation = (this.rotation+5)%360;
 		if(this.rotation > aiming_rotation) this.rotation = (this.rotation-5)%360;
-
-		speed *= (float)0.7;
 	}
 }

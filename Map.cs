@@ -4,6 +4,9 @@ public class Map{
 	
 	public Image[,] gmap;
 	public int[,] map;
+	public int[,] collision;
+
+	public Size size;
 
 	public Image[] tileMap;
 	public int tileDimension;
@@ -14,11 +17,15 @@ public class Map{
 		if(File.Exists(filepathTileset) == false) throw new Exception("Tileset inexistant");
 
 		var dimension = GetMapDimension(filepathMap[0]);
+		size = new Size(10, 10);
+
 		map = CreateMapArray(filepathMap[0],dimension);
 		int[,] map_layer2 = CreateMapArray(filepathMap[1],dimension);
 
+		collision = CreateMapArray(filepathMap[2],dimension);
+
 		tileDimension = 128;
-		tileRenderDimension = tileDimension/2;
+		tileRenderDimension = 64;
 		tileMap = ExtractTiles(filepathTileset, tileDimension);
 
 		gmap = BuildMapImages(map, map_layer2, tileMap);
@@ -32,44 +39,44 @@ public class Map{
 	}
 
 	Image[,] BuildMapImages(int[,] pmap, int[,] map_layer2, Image[] pTiles){
-		int mapSize = tileRenderDimension*map.GetLength(0);
-		int maxColumns = mapSize/Game.windowWidth + 1;
-		int maxRows = mapSize/Game.windowHeight + 1;
+		Size mapSize = new Size(tileRenderDimension*map.GetLength(0), tileRenderDimension*map.GetLength(1));
+		int maxColumns = (int)Math.Round((float)mapSize.Width/Game.windowWidth, MidpointRounding.AwayFromZero);
+		int maxRows = (int)Math.Round((float)mapSize.Height/Game.windowHeight, MidpointRounding.AwayFromZero);
 
 		Image[,] mapImages = new Image[maxColumns, maxRows]; 
 		for(int i=0;i<maxColumns;i++){
 			for(int j=0;j<maxRows;j++){
-				mapImages[i,j] = BuildMapImage(pmap, map_layer2, pTiles, i, j);
+				mapImages[i,j] = BuildMapImage(pmap, map_layer2, pTiles, i, j, mapSize);
+				Console.WriteLine(i + " " + j + " written");
 			}
 		}
 	
 		return mapImages;
 	}
 
-	Image BuildMapImage(int[,] pmap, int[,] pmap2, Image[] pTiles, int column, int row){
-		Image mapImage = new Bitmap(Game.windowWidth*2, Game.windowHeight*2);
-		int mapSize = tileRenderDimension*map.GetLength(0);
+	Image BuildMapImage(int[,] pmap, int[,] pmap2, Image[] pTiles, int column, int row, Size mapSize){
+		Image mapImage = new Bitmap(Game.windowWidth+1, Game.windowHeight+1);
 		Point position = new Point(column * Game.windowWidth, row * Game.windowHeight);
 
-		if(position.X > mapSize) return null;
-		if(position.Y > mapSize) return null;
+		if(position.X > mapSize.Width) return null;
+		if(position.Y > mapSize.Height) return null;
 
 		using (Graphics g = Graphics.FromImage(mapImage)){
-
-			int i = (int)position.X/tileRenderDimension;
-			int maxCol = (int)(position.X+Game.windowWidth*2)/tileRenderDimension;
+			int initI = (int)position.X/tileRenderDimension;
+			int maxCol = (int)(position.X+Game.windowWidth)/tileRenderDimension;
 			if(maxCol > pmap.GetLength(0)) maxCol = pmap.GetLength(0);
 
-			int j = (int)position.Y/tileRenderDimension;
-			int maxRow = (int)(position.Y+Game.windowHeight*2)/tileRenderDimension;	
+			int initJ = (int)position.Y/tileRenderDimension;
+			int maxRow = (int)(position.Y+Game.windowHeight)/tileRenderDimension;	
 			if(maxRow > pmap.GetLength(1)) maxRow = pmap.GetLength(1);
 
-			for(i=0;i<maxCol;i++){
-				for(j=0;j<maxRow;j++){
+			int i,j;
+			for(i=initI;i<maxCol;i++){
+				for(j=initJ;j<maxRow;j++){
 					if(map[i,j] == -1) continue;
-					g.DrawImage(tileMap[pmap[i,j]], i*tileRenderDimension, j*tileRenderDimension, tileRenderDimension, tileRenderDimension); 
+					g.DrawImage(tileMap[pmap[i,j]], (i-initI)*tileRenderDimension, (j-initJ)*tileRenderDimension, tileRenderDimension+1, tileRenderDimension+1); 
 					if(pmap2[i,j] == -1) continue;
-					g.DrawImage(tileMap[pmap2[i,j]], i*tileRenderDimension, j*tileRenderDimension, tileRenderDimension, tileRenderDimension); 
+					g.DrawImage(tileMap[pmap2[i,j]], (i-initI)*tileRenderDimension, (j-initJ)*tileRenderDimension, tileRenderDimension+1, tileRenderDimension+1); 
 				}
 			}
 		}

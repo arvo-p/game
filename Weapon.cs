@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 public class Weapon{
 	
 	public Size dimensions;
-	Sprite sprite;
+	public Sprite sprite;
 	short phase;
 	Player owner;
 
@@ -29,11 +29,10 @@ public class Weapon{
 	public void Shoot(){
 		if(isShooting) return;
 		isShooting = true;
-		new Task(() => {sprite.Trigger(EmitProjectile);}).Start();
+		sprite.Trigger();
 	}
 
-	public void EmitProjectile(){
+	public void EndShoot(){
 		isShooting = false;
-		owner.endAttack();
 	}
 }

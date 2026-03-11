@@ -1,5 +1,7 @@
 public class Object{
 	
+	protected Environment env;
+	
 	public RectangleF r;
 	public float speed;
 	public float rotation;
@@ -16,7 +18,6 @@ public class Object{
 	}
 
 	public Object(){
-
 	}
 	
 	public PointF Scalar2Vect_Speed(float rot, float scalarspeed){
@@ -32,6 +33,14 @@ public class Object{
 	}
 
 	public virtual void Update(){
+	}
 
+	public void UpdateRoutine(){
+		Update();
+	
+		if(speed < 0.2 && speed > -0.2) return;
+		PointF movement = Scalar2Vect_Speed(rotation, speed); 
+		env.Move(this, movement);
+		speed *= (float)0.7;
 	}
 }

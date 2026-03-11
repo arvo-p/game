@@ -31,27 +31,29 @@ public class Draw{
 	}
 	
 	private void DrawMap(PaintEventArgs e, Map map){
-		int i = (int)env.p.r.X/(Game.windowWidth*2);
-		int j = (int)env.p.r.Y/(Game.windowHeight*2);
-
-		if(i < 0) return;
-		if(j < 0) return;
-		if(i > map.gmap.GetLength(0)) return;
-		if(j > map.gmap.GetLength(1)) return;
-
-		e.Graphics.DrawImageUnscaled(map.gmap[0,0], 0*Game.windowWidth*2, 0*Game.windowHeight*2); 
+		int currentI = (int)Math.Floor(env.p.r.X/(Game.windowWidth));
+		int currentJ = (int)Math.Floor(env.p.r.Y/(Game.windowHeight));
+		
+		for(int i=currentI-1; i<currentI+2;i++){
+			if(i < 0 || i > map.gmap.GetLength(0) - 1) continue;
+			for(int j=currentJ-1; j<currentJ+2;j++){
+				if(j < 0 || j > map.gmap.GetLength(1) - 1) continue;
+				e.Graphics.DrawImageUnscaled(map.gmap[i,j], i*Game.windowWidth, j*Game.windowHeight); 
+			}
+		}
 	}
 
 	public void Update(PaintEventArgs e){
 		e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
         e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+		e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
 	
 		float offsetX = (windowWidth / 2) - env.p.r.X;
     	float offsetY = (windowHeight / 2) - env.p.r.Y;
 		
 		e.Graphics.TranslateTransform(offsetX, offsetY);
 		
-		DrawMap(e, Game.map);
+		DrawMap(e, env.map);
 
 		foreach(var obj in env.objects) DrawRotated(e, obj.image, obj.r, obj.rotation);
 		foreach(var obj in env.nonplayer_entities) DrawRotated(e, obj.image, obj.r, obj.rotation);

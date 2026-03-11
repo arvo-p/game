@@ -123,10 +123,19 @@ public class Resources{
 			"Thug/Biothug_death5.png",
 			"Thug/Biothug_death6.png"
 		};
-		public static string[] _vehicle = {
-			"Vehicle/Car.png",
-			"Vehicle/Audi.png",
-			"Vehicle/Black_viper.png",
+	}
+
+	public static class Vehicle{
+		public static string[] _car = {
+			"Vehicle/Car.png"
+		};
+		public static string[] _audi = {
+			"Vehicle/Audi.png"
+		};
+		public static string[] _blackviper = {
+			"Vehicle/Black_viper.png"
+		};
+		public static string[] _taxi = {
 			"Vehicle/taxi.png"
 		};
 	}

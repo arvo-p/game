@@ -9,17 +9,18 @@ public partial class Form1 : Form{
 	[return: MarshalAs(UnmanagedType.Bool)]
 	static extern bool AllocConsole();
 
-	private const short windowWidth = 1200;
-	private const short windowHeight = 800;
+	private const short windowWidth = 1024+256;
+	private const short windowHeight = 512+256;
 
     public Form1(){
-		Game.Init(this, windowWidth, windowHeight);
-		Debug();
 		InitializeUI();
+		Debug();
+		Game.Init(this, windowWidth, windowHeight);
 	}
 
 	private void Debug(){
 		AllocConsole();
+		Console.WriteLine("New console");
 	}
 
 	private void InitializeUI(){
