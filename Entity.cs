@@ -13,6 +13,15 @@ public class Entity : Object{
 		}
 	}
 
+	public bool HitscanCheck(PointF start, float angle, float range, RectangleF target){
+		for (float d = 0; d < range; d += 32){
+			float checkX = start.X + (float)Math.Cos(angle) * d;
+			float checkY = start.Y + (float)Math.Sin(angle) * d;
+
+			if (target.Contains(checkX, checkY)) return true;
+		}
+		return false;
+	}
 
 	public Entity(){
 	}

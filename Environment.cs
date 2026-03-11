@@ -55,12 +55,10 @@ public class Environment{
 
 
 		foreach(var p in poss){
-			int c = (int)Math.Floor(p.X/map.tileRenderDimension);
-			if(c >= map.collision.GetLength(0) || c < 0) return 1;
-			int r = (int)Math.Floor(p.Y/map.tileRenderDimension);
-			if(r >= map.collision.GetLength(1) || r < 0) return 1;	
-			if(map.collision[c,r] == 1) return 1;
-		}			
+			var r = map.GetTileFromCoordinates(p);
+			if(r.Item1 == -1) return 1;
+			if(map.collision[r.Item1,r.Item2] == 1) return 1;
+		}	
 
 		return 0;
 	}

@@ -84,6 +84,16 @@ public class Map{
 		return mapImage;
 	}
 
+	public (int, int) GetTileFromCoordinates(PointF dot){
+		int c = (int)Math.Floor(dot.X/tileRenderDimension);
+		if(c >= collision.GetLength(0) || c < 0) return (-1,-1);
+		
+		int r = (int)Math.Floor(dot.Y/tileRenderDimension);
+		if(r >= collision.GetLength(1) || r < 0) return (-1,-1);
+
+		return (c, r);
+	}
+
 	Image[] ExtractTiles(string filepath, int tileSize){
 		
 		Image tileset = Image.FromStream(new MemoryStream(File.ReadAllBytes(filepath)));
