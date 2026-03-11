@@ -51,11 +51,39 @@ public class Player : Entity{
 
 	bool isActionInProgress = false;
 	float attackTimer = 0;
-	public void startAttack(){
+
+	bool isAutoaiming = false;
+	bool autoaimRotation = 0;
+	public bool AutoAim(){
+		float closestDistance;
+		float closestHit_angle;
+		Entity closestHit;
+		foreach(var obj in env.nonplayer_entities){
+			PointF difference = new PointF(this.Y-entity.r.Y,this.X-entity.r.X);
+			float new_aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
+			if(Math.Abs(this.rotation - new_aiming_rotation) > 30) continue;
+
+			float dist = Tools.GetDistance(start, new PointF(obj.r.X, obj.r.Y));
+			if(dist < closestDistance){
+				closestHit_angle = new_aiming_rotation;
+				closestDistance = dist; 
+				closestHit = obj;
+			}
+		}
+
+		if(closestHit == null) return false;
+		
+		isAutoaiming = true;
+		autoaimRotation = closestHit_angle;
+
+		return true;
+	}
+
+	public void StartAttack(){
 		isActionInProgress = true;
 		if(countWeapon > 0){
 			selectedWeapon.Shoot();
-			HitscanCheck(this.GetCenter(), 600);   
+			HitscanCheck(this.GetCenter(), 400);   
 			_sprite = fire;
 		}else{
 			attackTimer = 1;
@@ -77,9 +105,7 @@ public class Player : Entity{
 		}
 
 		if((GetAsyncKeyState((int)Keys.Space) & 0x8000)!=0){
-			startAttack();
-			/* TO-DO : auto-aim nearest enemy
-			 */
+			if(AutoAim() == false) StartAttack();
 			return;
 		}
 
@@ -96,6 +122,16 @@ public class Player : Entity{
 
 	public override void Update(){
 		HandleInput();
+
+		if(isAutoaiming == true){
+			if(this.rotation < aiming_rotation) this.rotation = (this.rotation+5)%360;
+			if(this.rotation > aiming_rotation) this.rotation = (this.rotation-5)%360;
+			if(Math.Abs(this.rotation-aiming_rotation) < 5){
+				isAutoaiming = false;
+				StartAttack();
+			}
+		}
+
 		if(isActionInProgress == false)
 			_sprite = UpdateSprite();
 	}

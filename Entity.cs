@@ -15,7 +15,7 @@ public class Entity : Object{
 
 	public bool HitscanCheck(PointF start, float range){
 		float angle;
-		angle = this.rotation - 90;
+		angle = this.rotation*0.0174533f;
 
 		Console.WriteLine("Bullet rotation is " + angle);
 
@@ -25,8 +25,9 @@ public class Entity : Object{
 			targetPoint.Y = start.Y + (float)Math.Sin(angle) * d;
 
 			var r = env.map.GetTileFromCoordinates(targetPoint);
-			if(r.Item1 == -1) break;
-			if(env.map.collision[r.Item1, r.Item2] == 1) break;  
+			if(r.Item1 == -1 || env.map.collision[r.Item1, r.Item2] == 1){
+				break;  
+			}
 		}
 
 		float closestDistance = float.MaxValue;
@@ -44,6 +45,7 @@ public class Entity : Object{
 			}
 		}
 
+		Game.draw.DebugSetLine(start, targetPoint);
 		if(closestHit != null){
 			closestHit.IsHit();
 			return true;
