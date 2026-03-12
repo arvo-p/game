@@ -16,6 +16,8 @@ public class Thug : Entity{
 
 		r.Location = new Point(300, 300);
 		r.Size = new Size(72, 72);
+		PositionUpdated();
+		SetCollisionCircles();
 	}
 
 	void LoadSprites(){
@@ -39,7 +41,6 @@ public class Thug : Entity{
 	}
 	
 	public void Action(){
-		
 		PointF difference = new PointF(this.r.Y-local_player.r.Y,this.r.X-local_player.r.X);
 		aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
 
@@ -83,7 +84,7 @@ public class Thug : Entity{
 
 		this.rotation = aiming_rotation;
 
-		if(this.rotation < aiming_rotation) this.rotation = (this.rotation+5)%360;
-		if(this.rotation > aiming_rotation) this.rotation = (this.rotation-5)%360;
+		if(this.rotation < aiming_rotation) this.rotation += 5;
+		if(this.rotation > aiming_rotation) this.rotation -= 5;
 	}
 }

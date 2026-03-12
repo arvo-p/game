@@ -65,10 +65,12 @@ public class Draw{
 		foreach(var obj in env.nonplayer_entities) DrawRotated(e, obj.image, obj.r, obj.rotation);
 		
 		DrawPlayer(e, env.p);
-
+		
+		/*
 		Pen myPen = new Pen(Color.Red);
         myPen.Width = 8;
         e.Graphics.DrawLine(myPen, start.X, start.Y, end.X, end.Y);
+		*/
 	}
 
 	public Draw(Environment e, int windowWidth, int windowHeight){

@@ -14,7 +14,8 @@ public class Environment{
 	public Environment(){
 		map = new Map(new string[]{"Resources/Tiles/test_Background.csv","Resources/Tiles/test_Decorations.csv","Resources/Tiles/test_Collisions.csv"}, "Resources/Tiles/tilesheet.png");
 		p = new Player(this);
-		
+	
+		nonplayer_entities.Add(new Vehicle(this));
 		nonplayer_entities.Add(new Thug(this));
 		players.Add(p);
 		
@@ -26,22 +27,7 @@ public class Environment{
 	public void Update(){
 		foreach(var obj in objects){
 			obj.UpdateRoutine();
-			//if(CheckTileCollision(obj.r) != 0) obj.RollBackPosition();
 		}	
-		/*	
-		DoCollisionVerifications(objects, objects);
-		DoCollisionVerifications(objects, entities);
-		DoCollisionVerifications(entities, entities);*/
-	}
-
-
-	private bool IsColliding(RectangleF a, RectangleF b){
-		if (a.X + a.Width  < b.X) return false; 
-		if (a.X > b.X + b.Width)  return false;
-		if (a.Y + a.Height < b.Y) return false; 
-		if (a.Y > b.Y + b.Height) return false;
-
-		return true;
 	}
 
 	private int CheckTileCollision(RectangleF rect){
@@ -63,32 +49,91 @@ public class Environment{
 		return 0;
 	}
 
-	private void DoCollisionVerifications(IEnumerable<Object> list1, IEnumerable<Object> list2){
-		foreach(var obj in list1){
-			foreach(var obj2 in list2){
-				if(Object.ReferenceEquals(obj2, obj)) continue;
-				if(IsColliding(obj.r, obj2.r)){
-					obj.Collision();
-					obj2.Collision();
+	public PointF CheckTileCollision(Object obj, PointF speed){
+		RectangleF futureX = obj.r;
+		futureX.Location = new PointF(futureX.X + speed.X, futureX.Y);
+		bool collidedTile = (CheckTileCollision(futureX) == 1);
+		if(collidedTile) speed.X = 0;
+
+		RectangleF futureY = obj.r;
+		futureY.Location = new PointF(futureY.X, futureY.Y + speed.Y);
+		collidedTile = (CheckTileCollision(futureY) == 1);
+		if(collidedTile) speed.Y = 0; 
+
+		return speed;
+	}
+
+	private (float overlap, PointF direction) GetCirclesCollisionOverlap(CollisionCircle hitbox1, CollisionCircle hitbox2){
+		PointF direction = new PointF(hitbox1.center.X - hitbox2.center.X, hitbox1.center.Y - hitbox2.center.Y);
+		float distance = (float)Math.Sqrt(direction.X*direction.X+direction.Y*direction.Y); 
+		
+		if (distance == 0){
+			direction = new PointF(1, 0);
+			distance = 1;
+		}
+		direction.X /= distance;
+		direction.Y /= distance;
+
+		float overlap = (hitbox1.radius + hitbox2.radius) - distance;
+		return (overlap, direction);
+	}
+
+	public Object CheckObjectCollision(Object obj, float padding){
+		foreach(var obj2 in objects){
+			if(Object.ReferenceEquals(obj2, obj)) continue;
+			if(((float)Math.Pow(obj.r.X - obj2.r.X, 2) + Math.Pow(obj.r.Y - obj2.r.Y, 2)) >= 90000) continue;
+
+			foreach(var hitbox1 in obj.hitboxes){
+				foreach(var hitbox2 in obj2.hitboxes){
+					if(Tools.IsCircleColliding(hitbox1.center, hitbox1.radius+padding, hitbox2.center, hitbox2.radius) == false) continue;
+					return obj2;
 				}
 			}
 		}
+		return null;
+	}
+
+	public bool DoObjectCollision(Object obj, PointF speed){
+		bool collidedWithObject = false;
+		foreach(var obj2 in objects){
+			if(Object.ReferenceEquals(obj2, obj)) continue;
+			if(((float)Math.Pow(obj.r.X - obj2.r.X, 2) + Math.Pow(obj.r.Y - obj2.r.Y, 2)) >= 90000) continue;
+
+			bool resolvedThisFrame = false;
+			foreach(var hitbox1 in obj.hitboxes){
+				foreach(var hitbox2 in obj2.hitboxes){
+					if(Tools.IsCircleColliding(hitbox1, hitbox2) == false) continue;
+					collidedWithObject = true;
+					
+					var ret = GetCirclesCollisionOverlap(hitbox1, hitbox2);
+					float overlap = ret.overlap;
+					PointF direction = ret.direction;
+
+					obj.r.X += direction.X*(overlap+0.01f);
+					obj.r.Y += direction.Y*(overlap+0.01f);
+					
+					obj.PositionUpdated();
+					
+					resolvedThisFrame = true;
+					break;
+				}
+				if(resolvedThisFrame) break;
+			}
+		}
+
+		return collidedWithObject;
 	}
 
 	public void Move(Object obj, PointF speed){
-		//obj.r.Location = new PointF(movement.X + r.X, movement.Y + r.Y);
-		short nulx = 1;
-		short nuly = 1;
+		speed = CheckTileCollision(obj, speed);
+		if(speed.X == 0 && speed.Y == 0) return;
 
-		RectangleF r = obj.r;
-		
-		r.Location = new PointF(r.X + speed.X, r.Y);
-		if(CheckTileCollision(r) == 1) nulx = 0;
+		bool collidedWithObject = DoObjectCollision(obj, speed);
 
-		r.Location = new PointF(r.X, r.Y + speed.Y);
-		if(CheckTileCollision(r) == 1) nuly = 0;
-	
-		r = obj.r;
-		obj.r.Location = new PointF(r.X + speed.X*nulx, r.Y + speed.Y*nuly);
+		if(collidedWithObject == false){
+			obj.r.Y += speed.Y;
+			obj.r.X += speed.X;
+			obj.PositionUpdated();
+		}
 	}
 }

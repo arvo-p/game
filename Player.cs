@@ -32,7 +32,8 @@ public class Player : Entity{
 
 		r.Location = new Point(0, 0);
 		r.Size = new Size(74, 74);
-		
+		SetCollisionCircles();
+
 		weapons.Add(
 			(Weapon)env.weaponFootprints.list[3].Clone(this)
 		);
@@ -53,17 +54,17 @@ public class Player : Entity{
 	float attackTimer = 0;
 
 	bool isAutoaiming = false;
-	bool autoaimRotation = 0;
+	float autoaimRotation = 0;
 	public bool AutoAim(){
-		float closestDistance;
-		float closestHit_angle;
-		Entity closestHit;
+		float closestDistance=float.MaxValue;
+		float closestHit_angle=0;
+		Entity closestHit=null;
 		foreach(var obj in env.nonplayer_entities){
-			PointF difference = new PointF(this.Y-entity.r.Y,this.X-entity.r.X);
+			PointF difference = new PointF(this.r.Y-obj.r.Y,this.r.X-obj.r.X);
 			float new_aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
-			if(Math.Abs(this.rotation - new_aiming_rotation) > 30) continue;
+			if(Math.Abs(this.rotation - new_aiming_rotation) > 140) continue;
 
-			float dist = Tools.GetDistance(start, new PointF(obj.r.X, obj.r.Y));
+			float dist = Tools.GetDistance(this.r.Location, new PointF(obj.r.X, obj.r.Y));
 			if(dist < closestDistance){
 				closestHit_angle = new_aiming_rotation;
 				closestDistance = dist; 
@@ -79,11 +80,12 @@ public class Player : Entity{
 		return true;
 	}
 
+	bool lastGunHitSuccessful = false;
 	public void StartAttack(){
 		isActionInProgress = true;
 		if(countWeapon > 0){
 			selectedWeapon.Shoot();
-			HitscanCheck(this.GetCenter(), 400);   
+			lastGunHitSuccessful = HitscanCheck(this.center, 400);   
 			_sprite = fire;
 		}else{
 			attackTimer = 1;
@@ -93,25 +95,45 @@ public class Player : Entity{
 		return;
 	}
 
+	bool ActionKeyPressed = true;
 	public void HandleInput(){
-		if( (GetAsyncKeyState((int)Keys.Q) & 0x8000) != 0 ) rotation = (rotation-7)%360;
-		if( (GetAsyncKeyState((int)Keys.D) & 0x8000) != 0 ) rotation = (rotation+7)%360; 
+		if( (GetAsyncKeyState((int)Keys.Q) & 0x8000) != 0 ) rotation -= 7;
+		if( (GetAsyncKeyState((int)Keys.D) & 0x8000) != 0 ) rotation += 7; 
 		
 		if(isActionInProgress){
 			if(selectedWeapon.sprite.isAnimationFinished){
 				selectedWeapon.EndShoot();
 				isActionInProgress = false;
-			}else return;
+			};
 		}
 
 		if((GetAsyncKeyState((int)Keys.Space) & 0x8000)!=0){
-			if(AutoAim() == false) StartAttack();
+			if(lastGunHitSuccessful == false){
+				if(AutoAim() == false) StartAttack();
+			}else{
+				StartAttack();
+			}
 			return;
 		}
+		lastGunHitSuccessful = false;
 
-		if( (GetAsyncKeyState((int)Keys.Z) & 0x8000) != 0 ) speed += 3;
-		if( (GetAsyncKeyState((int)Keys.S) & 0x8000) != 0 ) speed -= 3;
+		if((GetAsyncKeyState((int)Keys.E) & 0x8000) != 0){
+			if(!ActionKeyPressed){
+				ActionKeyPressed = true;
+				ActionKey();
+			}
+		} else ActionKeyPressed = false;
+		
+		if((GetAsyncKeyState((int)Keys.Z) & 0x8000) != 0 ) speed += 3;
+		if((GetAsyncKeyState((int)Keys.S) & 0x8000) != 0 ) speed -= 3;
 		speed = Math.Clamp(speed, -15, 15);
+	}
+
+	private void ActionKey(){
+		Object collided = env.CheckObjectCollision(this, 10f);
+		if(collided != null){
+			MessageBox.Show(collided.GetType().Name);
+		}
 	}
 
 	private Sprite UpdateSprite(){
@@ -121,17 +143,17 @@ public class Player : Entity{
 	}
 
 	public override void Update(){
-		HandleInput();
-
 		if(isAutoaiming == true){
-			if(this.rotation < aiming_rotation) this.rotation = (this.rotation+5)%360;
-			if(this.rotation > aiming_rotation) this.rotation = (this.rotation-5)%360;
-			if(Math.Abs(this.rotation-aiming_rotation) < 5){
+			if(this.rotation < autoaimRotation) this.rotation = (this.rotation+10)%360;
+			if(this.rotation > autoaimRotation) this.rotation = (this.rotation-10)%360;
+			if(Math.Abs(this.rotation-autoaimRotation) < 10){
 				isAutoaiming = false;
 				StartAttack();
 			}
 		}
 
+		HandleInput();
+		
 		if(isActionInProgress == false)
 			_sprite = UpdateSprite();
 	}

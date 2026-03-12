@@ -17,8 +17,6 @@ public class Entity : Object{
 		float angle;
 		angle = this.rotation*0.0174533f;
 
-		Console.WriteLine("Bullet rotation is " + angle);
-
 		PointF targetPoint = start;
 		for (float d = 0; d < range; d += 16){
 			targetPoint.X = start.X + (float)Math.Cos(angle) * d;
@@ -36,7 +34,6 @@ public class Entity : Object{
 		foreach(var obj in env.objects){
 			if(obj == this) continue;
 			if(Tools.IsLineIntersectingRect(start, targetPoint, obj.r)){
-				MessageBox.Show("henl");
 				float dist = Tools.GetDistance(start, new PointF(obj.r.X, obj.r.Y));
 				if(dist < closestDistance){
 					closestDistance = dist; 
