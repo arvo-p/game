@@ -4,6 +4,13 @@ public class Object{
 	
 	public RectangleF r;
 	public float speed;
+	protected bool inverted_vectors=false;
+	protected int mass;
+	protected float friction=0.7f;
+
+	public bool isSolid = true;
+	
+	float _rotation;
 	public float rotation{
 		set{
 			if(value < 0) _rotation =(value+360)%360;
@@ -11,7 +18,6 @@ public class Object{
 		}
 		get => _rotation;
 	}
-
 
 	PointF? _center=null;
 	public PointF center{
@@ -23,7 +29,6 @@ public class Object{
 
 	public List<CollisionCircle> hitboxes = new List<CollisionCircle>();
 
-	float _rotation;
 
 	public Sprite _sprite;
 	public Sprite _spriteNext;
@@ -41,10 +46,11 @@ public class Object{
 	
 	public PointF Scalar2Vect_Speed(float rot, float scalarspeed){
 		double rot_radians = (rot)*0.0174533; 
-		return new PointF(
-				(float)(scalarspeed*Math.Cos(rot_radians)),
-				(float)(scalarspeed*Math.Sin(rot_radians))
+		PointF speed = new PointF(
+			(float)(scalarspeed*Math.Cos(rot_radians)),
+			(float)(scalarspeed*Math.Sin(rot_radians))
 		);
+		return speed;
 	}
 
 	public virtual void Update(){
@@ -53,13 +59,16 @@ public class Object{
 	public void Collision(Object obj){
 	}
 
-	public void UpdateRoutine(){
+	public virtual void UpdateRoutine(){
 		Update();
 	
 		if(speed < 0.2 && speed > -0.2) return;
 		PointF movement = Scalar2Vect_Speed(rotation, speed); 
+		if(this.inverted_vectors){
+			movement = Tools.SwapPointF(movement);
+		}
 		env.Move(this, movement);
-		speed *= (float)0.7;
+		speed *= (float)(friction);
 	}
 
 	public virtual void IsHit(){
@@ -68,18 +77,23 @@ public class Object{
 
 	public void PositionUpdated(){
 		_center = new PointF(r.X+r.Width/2,r.Y+r.Height/2);
-		CollisionCircle.UpdateCenters(hitboxes,r);
 	}
 
 	protected void SetCollisionCircles(){
-		int numCircles = (int)Math.Round(r.Height/r.Width, MidpointRounding.AwayFromZero);
-		float remainingHeight = r.Height;
+		float radius = r.Height>r.Width?r.Width/2:r.Height/2;
+		float totalLength = r.Height>r.Width?r.Height:r.Width;
+		float remainingLength = totalLength;
+		
+		int numCircles = (int)Math.Ceiling(r.Height/r.Width);
 		Console.WriteLine("Creating " + numCircles + "collision circles for " + this.GetType().Name);
+
 		for(int i=0;i<numCircles;i++){
-			CollisionCircle newCC = new CollisionCircle(r.Height - remainingHeight, r.Width/2);
-			remainingHeight -= r.Width;
+			float offset = (i==numCircles-1)?totalLength-radius*2:(totalLength-remainingLength); 
+			offset += -(totalLength/2) + radius;
+			
+			CollisionCircle newCC = new CollisionCircle(offset, radius, this);
+			remainingLength -= radius*2;
 			hitboxes.Add(newCC);
 		}
-		CollisionCircle.UpdateCenters(hitboxes,r);
 	}
 }

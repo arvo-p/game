@@ -1,23 +1,34 @@
-public class Thug : Entity{
+public class Thug : Enemy{
 
-	public Sprite walk;
-	public Sprite shoot;  
-	public Sprite stand;
-	public Sprite dead;
+	public Thug(){
+		Init();
+	}
 
-	Player local_player;
-
-	public Thug(Environment env){
-		this.env = env;
+	private void Init(){
+		Console.WriteLine("New thug created");
+		this.env = Game.env;
 		this.local_player = env.p;
 
+		r.Size = new Size(72, 72);
+		setHealth(100);
 		LoadSprites();
 		_sprite = stand;
 
-		r.Location = new Point(300, 300);
-		r.Size = new Size(72, 72);
+		mass = 90;
+
 		PositionUpdated();
 		SetCollisionCircles();
+	}
+
+	public Thug(PointF pos, Formation formation){
+		this.myFormation = formation;
+		this.r.Location = pos;
+		Init();
+	}
+
+	public Thug(PointF pos){
+		r.Location = pos;
+		Init();
 	}
 
 	void LoadSprites(){
@@ -33,58 +44,4 @@ public class Thug : Entity{
 		return stand;
 	}
 
-	bool isActionInProgress = false;
-	float aiming_rotation;
-
-	public override void IsHit(){
-		isDead = true;
-	}
-	
-	public void Action(){
-		PointF difference = new PointF(this.r.Y-local_player.r.Y,this.r.X-local_player.r.X);
-		aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
-
-		if(this.rotation-aiming_rotation > 180){
-			this.rotation -= 180;
-			speed *= -1;
-		}
-
-		if(isActionInProgress){
-			attackTimer+=-0.052f;
-			if(attackTimer <= 0){
-				isActionInProgress = false;
-			}else{
-				return;
-			}
-		}
-
-		float dx = this.r.X - local_player.r.X;
-		float dy = this.r.Y - local_player.r.Y;
-
-		float distance = (float)(dx*dx+dy*dy);
-		if(distance > 90000){
-			if(_sprite != walk) _sprite = walk;
-			speed = Math.Clamp(speed + 1, -4, 4);
-		}else{
-			if(_sprite != shoot) _sprite = shoot;
-			isActionInProgress = true;
-			attackTimer = 1;
-			_sprite.Trigger();
-			speed = 0;
-		}
-	}
-
-	float attackTimer = 1;
-	public void endAttack(){
-		isActionInProgress = false;
-	}
-
-	public override void Update(){
-		Action();
-
-		this.rotation = aiming_rotation;
-
-		if(this.rotation < aiming_rotation) this.rotation += 5;
-		if(this.rotation > aiming_rotation) this.rotation -= 5;
-	}
 }

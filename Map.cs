@@ -6,7 +6,7 @@ public class Map{
 	public int[,] map;
 	public int[,] collision;
 
-	public Size size;
+	public Size worldsize;
 
 	public Image[] tileMap;
 	public int tileDimension;
@@ -17,7 +17,6 @@ public class Map{
 		if(File.Exists(filepathTileset) == false) throw new Exception("Tileset inexistant");
 
 		var dimension = GetMapDimension(filepathMap[0]);
-		size = new Size(10, 10);
 
 		map = CreateMapArray(filepathMap[0],dimension);
 		int[,] map_layer2 = CreateMapArray(filepathMap[1],dimension);
@@ -29,6 +28,7 @@ public class Map{
 		tileMap = ExtractTiles(filepathTileset, tileDimension);
 
 		gmap = BuildMapImages(map, map_layer2, tileMap);
+		this.worldsize = new Size(dimension.width*tileRenderDimension, dimension.height*tileRenderDimension);
 
 		/*for(int i=0;i<mapArray.GetLength(0);i++){
 
@@ -84,14 +84,18 @@ public class Map{
 		return mapImage;
 	}
 
-	public (int, int) GetTileFromCoordinates(PointF dot){
-		int c = (int)Math.Floor(dot.X/tileRenderDimension);
+	public (int x, int y) GetTileFromCoordinates(float x, float y){
+		int c = (int)Math.Floor(x/tileRenderDimension);
 		if(c >= collision.GetLength(0) || c < 0) return (-1,-1);
 		
-		int r = (int)Math.Floor(dot.Y/tileRenderDimension);
+		int r = (int)Math.Floor(y/tileRenderDimension);
 		if(r >= collision.GetLength(1) || r < 0) return (-1,-1);
 
 		return (c, r);
+	}
+
+	public (int x, int y) GetTileFromCoordinates(PointF dot){
+		return GetTileFromCoordinates(dot.X, dot.Y);
 	}
 
 	Image[] ExtractTiles(string filepath, int tileSize){
@@ -128,7 +132,7 @@ public class Map{
 		return tile;
 	}
 
-	(int, int) GetMapDimension(string path){
+	(int width, int height) GetMapDimension(string path){
 
 		int countLine=0;
 		int countCommas = 0;

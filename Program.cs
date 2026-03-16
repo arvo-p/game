@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace game;
 
 static class Program
@@ -5,12 +7,20 @@ static class Program
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>
+	[DllImport("kernel32", SetLastError = true)]
+    private static extern bool AttachConsole(int dwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+
     [STAThread]
     static void Main()
     {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
-        ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
+       AttachConsole(-1);
+       ApplicationConfiguration.Initialize();
+       Application.Run(new Form1());
     }    
 }

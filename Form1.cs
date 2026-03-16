@@ -1,14 +1,9 @@
-using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace game;
 
 public partial class Form1 : Form{
-	[DllImport("kernel32.dll", SetLastError = true)]
-	[return: MarshalAs(UnmanagedType.Bool)]
-	static extern bool AllocConsole();
-
 	private const short windowWidth = 1024+256;
 	private const short windowHeight = 512+256;
 
@@ -19,7 +14,6 @@ public partial class Form1 : Form{
 	}
 
 	private void Debug(){
-		AllocConsole();
 		Console.WriteLine("New console");
 	}
 

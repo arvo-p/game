@@ -2,6 +2,9 @@ public class Entity : Object{
 	
 	protected bool isAttacking = false;
 	protected bool isDead = false;
+	protected bool isStunned = false;
+	
+	protected float maxspeed;
 	
 	int _health;
 	public int maxhealth;

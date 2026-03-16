@@ -31,6 +31,15 @@ public static class Tools{
 		return (float)Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
 	}
 	
+	public static float GetDistanceSquared(PointF p1, PointF p2){
+		return (float)(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+	}
+	
+	public static float GetAngleDifference(float angle1, float angle2){
+		float diff = (angle2 - angle1 + 180) % 360 - 180;
+		return diff < -180 ? diff + 360 : diff;
+	}
+
 	public static bool IsCircleColliding(PointF center1, float radius1, PointF center2, float radius2){
 		float combinedradius = radius1 + radius2;
 		
@@ -41,7 +50,28 @@ public static class Tools{
 		return distanceSquared < (combinedradius * combinedradius);
 	}
 
+	public static PointF SwapPointF(PointF p){
+		float holder = p.X;
+		p.X = -p.Y;
+		p.Y = holder;
+
+		return p;
+	}
+
 	public static bool IsCircleColliding(CollisionCircle obj1, CollisionCircle obj2){
 		return IsCircleColliding(obj1.center, obj1.radius, obj2.center, obj2.radius); 
+	}
+
+	// not used
+	public static PointF RotateVector(PointF vector, float rotationDegrees){
+		double radians = rotationDegrees * (Math.PI / 180.0);
+
+		float cos = (float)Math.Cos(radians);
+		float sin = (float)Math.Sin(radians);
+
+		float newX = vector.X * cos - vector.Y * sin;
+		float newY = vector.X * sin + vector.Y * cos;
+
+		return new PointF(newX, newY);
 	}
 }

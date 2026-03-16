@@ -31,8 +31,8 @@ public class Draw{
 	}
 	
 	private void DrawMap(PaintEventArgs e, Map map){
-		int currentI = (int)Math.Floor(env.p.r.X/(Game.windowWidth));
-		int currentJ = (int)Math.Floor(env.p.r.Y/(Game.windowHeight));
+		int currentI = (int)Math.Floor(Game.camera.r.X/(Game.windowWidth));
+		int currentJ = (int)Math.Floor(Game.camera.r.Y/(Game.windowHeight));
 		
 		for(int i=currentI-1; i<currentI+2;i++){
 			if(i < 0 || i > map.gmap.GetLength(0) - 1) continue;
@@ -54,8 +54,8 @@ public class Draw{
         e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
 		e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
 	
-		float offsetX = (windowWidth / 2) - env.p.r.X;
-    	float offsetY = (windowHeight / 2) - env.p.r.Y;
+		float offsetX = (windowWidth / 2) - Game.camera.r.X;
+    	float offsetY = (windowHeight / 2) - Game.camera.r.Y;
 		
 		e.Graphics.TranslateTransform(offsetX, offsetY);
 		
@@ -67,10 +67,16 @@ public class Draw{
 		DrawPlayer(e, env.p);
 		
 		/*
+		 * DEBUG collision
 		Pen myPen = new Pen(Color.Red);
         myPen.Width = 8;
-        e.Graphics.DrawLine(myPen, start.X, start.Y, end.X, end.Y);
-		*/
+		foreach(var ent in env.entities){
+			foreach(var hit in ent.hitboxes){
+				e.Graphics.DrawEllipse(myPen, hit.center.X-hit.radius, hit.center.Y-hit.radius, hit.radius*2, hit.radius*2); 
+				float diffHeight = hit.offset;
+        		e.Graphics.DrawLine(myPen, ent.r.X+ent.r.Width/2, ent.r.Y+ent.r.Height/2, ent.r.X+ent.r.Width/2, diffHeight+ent.r.Y+ent.r.Height/2);
+			}
+		}*/
 	}
 
 	public Draw(Environment e, int windowWidth, int windowHeight){
