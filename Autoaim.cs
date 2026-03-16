@@ -37,7 +37,7 @@ public class Autoaim{
 	public void UpdateList(){
 		sortedTargets.Clear();
 
-		foreach(var obj in env.nonplayer_entities){
+		foreach(var obj in env.All.Entities.NPCs){
 			float dist = Tools.GetDistanceSquared(parent.r.Location, new PointF(obj.r.X, obj.r.Y));
 			if(dist > 490000) continue; 
 

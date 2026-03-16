@@ -29,7 +29,6 @@ public class Object{
 
 	public List<CollisionCircle> hitboxes = new List<CollisionCircle>();
 
-
 	public Sprite _sprite;
 	public Sprite _spriteNext;
 

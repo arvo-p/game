@@ -52,7 +52,6 @@ public class Player : Entity{
 		fire = new Sprite(Resources.Player._fire,0);
 	}
 
-	bool isAttacking = false;
 	float attackTimer = 0;
 	bool lastGunHitSuccessful = false;
 	public void StartAttack(){

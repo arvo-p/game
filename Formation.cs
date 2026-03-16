@@ -49,7 +49,7 @@ public class Formation{
 	public int NewEnemy(PointF pos){
 		Enemy newEnemy = new Thug(pos,this);
 		enemies.Add(newEnemy);
-		env.AddObject(newEnemy);
+		env.All.Add(newEnemy);
 		
 		return 0;
 	}

@@ -34,7 +34,7 @@ public class Entity : Object{
 		float closestDistance = float.MaxValue;
 		Object closestHit = null;
 
-		foreach(var obj in env.objects){
+		foreach(var obj in env.All){
 			if(obj == this) continue;
 			if(Tools.IsLineIntersectingRect(start, targetPoint, obj.r)){
 				float dist = Tools.GetDistance(start, new PointF(obj.r.X, obj.r.Y));

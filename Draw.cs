@@ -61,10 +61,9 @@ public class Draw{
 		
 		DrawMap(e, env.map);
 
-		foreach(var obj in env.objects) DrawRotated(e, obj.image, obj.r, obj.rotation);
-		foreach(var obj in env.nonplayer_entities) DrawRotated(e, obj.image, obj.r, obj.rotation);
-		
-		DrawPlayer(e, env.p);
+		foreach(var obj in env.All.Objects) DrawRotated(e, obj.image, obj.r, obj.rotation);
+		foreach(var obj in env.All.Entities.NPCs) DrawRotated(e, obj.image, obj.r, obj.rotation);
+		foreach(var obj in env.All.Entities.Players) DrawPlayer(e, obj);
 		
 		/*
 		 * DEBUG collision

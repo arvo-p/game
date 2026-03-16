@@ -6,12 +6,9 @@ public class Environment{
 
 	public Map map;
 
-	public List<Object> objects = new List<Object>();
-	public List<Entity> nonplayer_entities = new List<Entity>();
-	public List<Entity> entities = new List<Entity>();
-	public List<Entity> players = new List<Entity>();
-
 	public Player p;
+
+	public ObjectsManager All = new ObjectsManager();
 	
 	/* TODO
 	 * - List organizer
@@ -31,44 +28,22 @@ public class Environment{
 		p = new Player();
 		Game.camera.Follow(p);
 
-		nonplayer_entities.Add(new Vehicle());
+		All.Add(new Vehicle());
 		/*nonplayer_entities.Add(new Thug(new Point(300, 300)));
 		nonplayer_entities.Add(new Thug(new Point(300, 500)));
 		nonplayer_entities.Add(new Thug(new Point(300, 700)));*/
 		
-		players.Add(p);
-		
-		entities.AddRange(nonplayer_entities);
-		entities.AddRange(players);
-		objects.AddRange(entities);
+		All.Add(p);
 		
 		fTemp = new Formation();
 	}
 	
 	public void Update(){
 		fTemp.Update();
-		foreach(var obj in objects)
+		foreach(var obj in All)
 			obj.UpdateRoutine();
 	}
 
-	public void RemoveObject(Object obj){
-		objects.Remove(obj);
-	}
-
-	public void AddObject(Object obj){
-		objects.Add(obj);
-	}
-
-	public void AddObject(Entity ent){
-		objects.Add((Object)ent);
-		nonplayer_entities.Add(ent);
-		entities.Add(ent);
-	}
-
-	public void AddObject(IEnumerable<Object> obj){
-		objects.AddRange(obj);
-	}
-	
 	private int ResolveRectangleTileCollision(RectangleF rect){
 		PointF[] poss = {
 			new PointF(rect.X+10, rect.Y+10),
@@ -180,7 +155,7 @@ public class Environment{
 	}
 
 	public Object IsObjectColliding(Object obj, float padding, Func<Object, CollisionCircle, CollisionCircle, int, int> extfunction, int mode){
-		foreach(var obj2 in objects){
+		foreach(var obj2 in All){
 			if(Object.ReferenceEquals(obj2, obj)) continue;
 			if(obj2.isSolid == false) continue;
 			if(((float)Math.Pow(obj.r.X - obj2.r.X, 2) + Math.Pow(obj.r.Y - obj2.r.Y, 2)) >= 90000) continue;
