@@ -1,7 +1,7 @@
 public class Entity : Object{
 	
 	protected bool isAttacking = false;
-	protected bool isDead = false;
+	public bool isDead = false;
 	protected bool isStunned = false;
 	protected bool doUpdateSprite = false;
 	

@@ -108,6 +108,15 @@ public class Resources{
 			"Environments/blood.png"
 		};
 	}
+	
+	public static class UI{
+		public static string[] _crosshair1 = {
+			"UI/Crosshair.png"
+		};
+		public static string[] _crosshair2 = {
+			"UI/Crosshair1.png"
+		};
+	}
 
 	public static class Thug{
 		public static string[] _walk = {

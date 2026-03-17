@@ -40,6 +40,10 @@ public class Draw{
 		DrawRotated(e, weapon.image, player.r, player.rotation);
 	}
 	
+	private void DrawCrosshair(PaintEventArgs e, Crosshair c){
+		e.Graphics.DrawImage(c.image, c.r.X, c.r.Y, c.r.Width, c.r.Height);
+	}
+	
 	private void DrawMap(PaintEventArgs e, Map map){
 		int currentI = (int)Math.Floor(Game.camera.r.X/(Game.windowWidth));
 		int currentJ = (int)Math.Floor(Game.camera.r.Y/(Game.windowHeight));
@@ -72,6 +76,9 @@ public class Draw{
 
 		foreach(var prp in env.props) e.Graphics.DrawImage(prp.image, prp.r.X, prp.r.Y, prp.r.Width, prp.r.Height);
 		foreach(var obj in env.All.Objects) DrawRotated(e, obj.image, obj.r, obj.rotation);
+		
+		if(env.crosshair.isOn) DrawCrosshair(e, env.crosshair);
+
 		foreach(var obj in env.All.Entities.NPCs) DrawEntity(e, obj);
 		foreach(var obj in env.All.Entities.Players) DrawPlayer(e, obj);
 

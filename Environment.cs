@@ -5,6 +5,8 @@ public class Environment{
 	public WeaponFootprints weaponFootprints = new WeaponFootprints();
 	public Map map;
 	public Player p;
+	public Crosshair crosshair;
+
 	public ObjectsManager All = new ObjectsManager();
 	public List<Prop> props = new List<Prop>();
 
@@ -24,7 +26,8 @@ public class Environment{
 		Game.env = this;
 		map = new Map(new string[]{"Resources/Tiles/test_Background.csv","Resources/Tiles/test_Decorations.csv","Resources/Tiles/test_Collisions.csv"}, "Resources/Tiles/tilesheet.png");
 
-		p = new Player();
+		crosshair = new Crosshair(Resources.UI._crosshair1,Resources.UI._crosshair2);
+		p = new Player(crosshair);
 		Game.camera.Follow(p);
 
 		All.Add(new Vehicle());

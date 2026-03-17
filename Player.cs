@@ -17,11 +17,11 @@ public class Player : Entity{
 	Autoaim autoaim;
 	Keyboard mykeyboard;
 
-	public Player(){
+	public Player(Crosshair crosshair){
 		this.env = Game.env;
 
 		mykeyboard = new Keyboard(new Keys[]{Keys.Z, Keys.Q, Keys.S, Keys.D, Keys.E, Keys.Space, Keys.D1, Keys.D2, Keys.D3, Keys.D4});
-		autoaim = new Autoaim(this);
+		autoaim = new Autoaim(this, crosshair);
 
 		LoadSprites();
 		_sprite = stand;
@@ -78,15 +78,17 @@ public class Player : Entity{
 		if(mykeyboard.GetKeyOnce(Keys.D3)) idxSelectedWeapon = 2;
 		if(mykeyboard.GetKeyOnce(Keys.D4)) idxSelectedWeapon = 3;
 
-		if(isAttacking){
+		if(autoaim.isAutoaiming){
 			if(mykeyboard.GetKeyOnce(Keys.Q)){
-				if(isAttacking) autoaim.SelectNext(-1);
+				autoaim.SelectNext(-1);
 			}
 
 			if(mykeyboard.GetKeyOnce(Keys.D)){
-				if(isAttacking) autoaim.SelectNext(1);
+				autoaim.SelectNext(1);
 			}
+		}
 
+		if(isAttacking){
 			if(selectedWeapon.sprite.isAnimationFinished){
 				selectedWeapon.EndShoot();
 				isAttacking = false;
@@ -104,20 +106,30 @@ public class Player : Entity{
 			if(lastGunHitSuccessful == false){
 				autoaim.UpdateList();
 				if(!autoaim.SelectNext(0))
-					StartAttack();
-			} StartAttack();
+				StartAttack();
+			}
+			StartAttack();
 			speed = 0;
 			return;
 		}
-		lastGunHitSuccessful = false;
 
 		if(mykeyboard.GetKeyOnce(Keys.E)){
 			bool leave = ActionKey();
 			if(leave) return;
 		}
 		
-		if(mykeyboard.GetKey(Keys.Z)) speed += 3;
-		if(mykeyboard.GetKey(Keys.S)) speed -= 3;
+		if(mykeyboard.GetKey(Keys.Z)){
+			lastGunHitSuccessful = false;
+			autoaim.Set(false);
+			speed += 3;
+		}
+
+		if(mykeyboard.GetKey(Keys.S)){
+			lastGunHitSuccessful = false;
+			autoaim.Set(false);
+			speed -= 3;
+		}
+
 		speed = Math.Clamp(speed, -15, 15);
 	}
 
@@ -142,17 +154,13 @@ public class Player : Entity{
 
 	public override void Update(){
 		if(autoaim.isAutoaiming == true){
+			if(autoaim.crosshair.isOn) autoaim.crosshair.Update();
 			float diff = Tools.GetAngleDifference(this.rotation, autoaim.rotation);
-			if(diff > 0) this.rotation = (this.rotation+10)%360;
-			if(diff < 0) this.rotation = (this.rotation-10)%360;
-			if(Math.Abs(diff) < 10){
-				autoaim.isAutoaiming = false;
-				StartAttack();
-			}
+			float lerpFactor = 0.1f;
+			this.rotation += diff*lerpFactor;
 		}
 
 		if(mykeyboard != null) HandleInput();
-		
 		if(isAttacking == false)
 			_sprite = UpdateSprite();
 	}
