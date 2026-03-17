@@ -31,6 +31,36 @@ public class Draw{
 		e.Graphics.Restore(state);
 	}
 
+	private void DrawVehicle(PaintEventArgs e, Vehicle ent){
+		RectangleF r = ent.r;
+		if(ent.isAccelerating == 1){
+			r.Width *= ent.squashFactor;
+			r.Height *= ent.stretchFactor;
+		}
+		if(ent.isAccelerating == -1){
+			r.Width *= ent.stretchFactor;
+			r.Height *= ent.squashFactor;
+		}
+		
+		float fakeHeight = ent.speed * 0.1f;
+		if(fakeHeight < 0) fakeHeight *= -1;
+
+		float offset = 0;
+		if(ent.isTurning == -1) offset = 5;
+		if(ent.isTurning == 1) offset = -5;
+		
+		var state = e.Graphics.Save();
+		e.Graphics.TranslateTransform((float)(r.Width)/2+r.X, (float)r.Height / 2+r.Y);
+		e.Graphics.RotateTransform(ent.rotation);
+		e.Graphics.DrawImage(ent.shadow.image, -r.Width/2+offset+fakeHeight, -r.Height/2+fakeHeight, r.Width, r.Height);
+		e.Graphics.DrawImage(ent.image, -r.Width/2, -r.Height/2, r.Width, r.Height);
+		
+		if(ent.props != null)
+			foreach(var p in ent.props)
+				e.Graphics.DrawImage(p.image, -p.r.Width/2+p.r.X, -p.r.Height/2+p.r.Y, p.r.Width, p.r.Height);
+		e.Graphics.Restore(state);
+	}
+
 	private void DrawPlayer(PaintEventArgs e, Player player){
 		Graphics g = e.Graphics;
 		DrawRotated(e, player.image, player.r, player.rotation);
@@ -80,6 +110,7 @@ public class Draw{
 		if(env.crosshair.isOn) DrawCrosshair(e, env.crosshair);
 
 		foreach(var obj in env.All.Entities.NPCs) DrawEntity(e, obj);
+		foreach(var obj in env.All.Entities.Vehicles) DrawVehicle(e, obj);
 		foreach(var obj in env.All.Entities.Players) DrawPlayer(e, obj);
 
 		/*

@@ -10,13 +10,8 @@ public class Sprite{
 	bool _isAnimationFinished = false;
 	int restingframe_idx = 0;
 
-	public bool isInfiniteLoop{
-		get => _isInfiniteLoop;
-	}
-
-	public bool isAnimationFinished{
-		get => _isAnimationFinished;
-	}
+	public bool isInfiniteLoop{get => _isInfiniteLoop;}
+	public bool isAnimationFinished{get => _isAnimationFinished;}
 
 	public Image frame{
 		get{

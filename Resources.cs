@@ -151,6 +151,9 @@ public class Resources{
 	}
 
 	public static class Vehicle{
+		public static string[] _carshadow = {
+			"Vehicle/Shadow.png"
+		};
 		public static string[] _car = {
 			"Vehicle/Car.png"
 		};
