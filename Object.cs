@@ -7,6 +7,7 @@ public class Object{
 	protected bool inverted_vectors=false;
 	protected int mass;
 	protected float friction=0.7f;
+	public List<Prop> props = null;
 
 	public bool isSolid = true;
 	
@@ -70,7 +71,7 @@ public class Object{
 		speed *= (float)(friction);
 	}
 
-	public virtual void IsHit(){
+	public virtual void IsHit(float damage, float rotation){
 
 	}
 

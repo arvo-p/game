@@ -3,6 +3,7 @@ public class Entity : Object{
 	protected bool isAttacking = false;
 	protected bool isDead = false;
 	protected bool isStunned = false;
+	protected bool doUpdateSprite = false;
 	
 	protected float maxspeed;
 	
@@ -11,12 +12,17 @@ public class Entity : Object{
 	public int health{
 		get => _health;
 		set{
-			if(_health-value < 0) _health=0;
-			if(health+value > maxhealth) _health=maxhealth;
+			if(value < 0){
+				_health=0;
+				if(isDead == false) doUpdateSprite = true;
+				isDead = true;
+			}
+			else if(value > maxhealth) _health=maxhealth;
+			else _health = value;
 		}
 	}
 
-	public bool HitscanCheck(PointF start, float range){
+	public Object HitscanCheck(PointF start, float range){
 		float angle;
 		angle = this.rotation*0.0174533f;
 
@@ -47,11 +53,10 @@ public class Entity : Object{
 
 		Game.draw.DebugSetLine(start, targetPoint);
 		if(closestHit != null){
-			closestHit.IsHit();
-			return true;
+			return closestHit;
 		}
 
-		return false;
+		return null;
 	}
 
 	public Entity(){
@@ -59,10 +64,10 @@ public class Entity : Object{
 
 	protected void setHealth(int health){
 		this.maxhealth = health;
-		this.health = health;
+		this._health = health;
 	}
 
-	public override void IsHit(){
+	public override void IsHit(float damage, float rotation){
 	}
 
 	public override void Update(){

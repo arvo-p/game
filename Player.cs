@@ -2,14 +2,11 @@ using System.Windows.Input;
 
 public class Player : Entity{
 	List<Weapon> weapons = new List<Weapon>();
-	short idxSelectedWeapon = 0;
-	short countWeapon = 0;
 	
-	public Weapon selectedWeapon{
-		get{
-			return countWeapon!=0?weapons[idxSelectedWeapon]:null;
-		}
-	}
+	short countWeapon = 0;
+	short _idxSelectedWeapon = 0;
+	public short idxSelectedWeapon{get=>_idxSelectedWeapon;set=>_idxSelectedWeapon=value<countWeapon?value:(short)(countWeapon-1);}
+	public Weapon selectedWeapon{get => countWeapon!=0?weapons[_idxSelectedWeapon]:null;}
 
 	Sprite walk;
 	Sprite meleethrow;  
@@ -23,7 +20,7 @@ public class Player : Entity{
 	public Player(){
 		this.env = Game.env;
 
-		mykeyboard = new Keyboard(new Keys[]{Keys.Z, Keys.Q, Keys.S, Keys.D, Keys.E, Keys.Space});
+		mykeyboard = new Keyboard(new Keys[]{Keys.Z, Keys.Q, Keys.S, Keys.D, Keys.E, Keys.Space, Keys.D1, Keys.D2, Keys.D3, Keys.D4});
 		autoaim = new Autoaim(this);
 
 		LoadSprites();
@@ -33,15 +30,18 @@ public class Player : Entity{
 		setHealth(100);
 		
 		r.Location = new Point(0, 0);
-		r.Size = new Size(74, 74);
+		r.Size = new Size(70, 70);
 		mass = 90;
 		SetCollisionCircles();
 
-		weapons.Add(
-			(Weapon)env.weaponFootprints.list[3].Clone(this)
+		weapons.AddRange(
+			(Weapon)env.weaponFootprints.list[4].Clone(this),
+			(Weapon)env.weaponFootprints.list[5].Clone(this),
+			(Weapon)env.weaponFootprints.list[6].Clone(this)
 		);
+		
 		countWeapon = (short)weapons.Count; 
-		idxSelectedWeapon = 0;
+		idxSelectedWeapon = 3;
 	}
 
 	void LoadSprites(){
@@ -58,7 +58,9 @@ public class Player : Entity{
 		isAttacking = true;
 		if(countWeapon > 0){
 			selectedWeapon.Shoot();
-			lastGunHitSuccessful = HitscanCheck(this.center, 400);   
+			Object who = HitscanCheck(this.center, 400);   
+			if(lastGunHitSuccessful = (who != null))
+				who.IsHit(selectedWeapon.damage, rotation);
 			_sprite = fire;
 		}else{
 			attackTimer = 1;
@@ -70,6 +72,11 @@ public class Player : Entity{
 
 	private void HandleInput(){
 		mykeyboard.ReadKeys();
+
+		if(mykeyboard.GetKeyOnce(Keys.D1)) idxSelectedWeapon = 0;
+		if(mykeyboard.GetKeyOnce(Keys.D2)) idxSelectedWeapon = 1;
+		if(mykeyboard.GetKeyOnce(Keys.D3)) idxSelectedWeapon = 2;
+		if(mykeyboard.GetKeyOnce(Keys.D4)) idxSelectedWeapon = 3;
 
 		if(isAttacking){
 			if(mykeyboard.GetKeyOnce(Keys.Q)){

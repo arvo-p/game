@@ -9,7 +9,7 @@ public class Thug : Enemy{
 		this.env = Game.env;
 		this.local_player = env.p;
 
-		r.Size = new Size(72, 72);
+		r.Size = new Size(70, 70);
 		setHealth(100);
 		LoadSprites();
 		_sprite = stand;
@@ -35,7 +35,7 @@ public class Thug : Enemy{
 		walk = new Sprite(Resources.Thug._walk);
 		shoot = new Sprite(Resources.Thug._shoot, 0);
 		stand = new Sprite(Resources.Thug._stand);
-		dead = new Sprite(Resources.Thug._death);
+		dead = new Sprite(Resources.Thug._death, -1);
 	}
 
 	private Sprite UpdateSprite(){
@@ -44,4 +44,7 @@ public class Thug : Enemy{
 		return stand;
 	}
 
+	public override void Update(){
+		_sprite = UpdateSprite();
+	}
 }

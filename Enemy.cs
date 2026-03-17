@@ -88,15 +88,31 @@ public class Enemy : Entity{
 		}
 	}
 
-	public override void IsHit(){
+	public override void IsHit(float damage, float rotation){
+		float radians = (float)(Math.PI/180)*rotation;
+
+		if(isDead) return;
 		_sprite = stand;
-		speed = -5;
 		
+		health += -(int)damage;
+		speed = -5;
 		isStunned = true;
 		tStun = 1;
+
+		Blood.SprayBlood(r.Location, new PointF((float)Math.Cos(radians),(float)Math.Sin(radians)));
 	}
 
 	public override void UpdateRoutine(){
+		if(isDead){
+			if(doUpdateSprite){
+				doUpdateSprite = false;
+				Update();
+				_sprite.Trigger();
+			}
+			return;
+		}
+
+
 		if(myFormation == null) Action();
 		else ActionFormation();
 

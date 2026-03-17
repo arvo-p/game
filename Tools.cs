@@ -8,6 +8,11 @@ public static class Tools{
 			   LineIntersectsLine(p1, p2, new PointF(r.Right, r.Top), new PointF(r.Right, r.Bottom));
 	}
 
+	public static float RandomFloat(int min, int max){
+		int diff = max-min;
+		return (Random.Shared.NextSingle() * (float)diff)+(float)min;
+	}
+
 	public static bool IsColliding(RectangleF a, RectangleF b){
 		if (a.X + a.Width  < b.X) return false; 
 		if (a.X > b.X + b.Width)  return false;

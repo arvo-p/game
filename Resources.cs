@@ -91,6 +91,22 @@ public class Resources{
 			"Player/Weapon6_3.png",
 			"Player/Weapon6_4.png"
 		};
+		public static string[] _weapon8 = {
+			"Player/Weapon8_bypasser1.png",
+			"Player/Weapon8_bypasser2.png"
+		};
+	}
+
+	public static class Environments{
+		public static string[] _smoke = {
+			"Environments/smoke1.png",
+			"Environments/smoke2.png",
+			"Environments/smoke3.png",
+			"Environments/smoke4.png"
+		};
+		public static string[] _blood = {
+			"Environments/blood.png"
+		};
 	}
 
 	public static class Thug{

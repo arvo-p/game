@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 public class Weapon{
-	
+	public float damage;
 	public Size dimensions;
 	public Sprite sprite;
 	short phase;
@@ -12,10 +12,11 @@ public class Weapon{
 		get => sprite.frame;
 	}
 
-	public Weapon(string[] resources, Size dimensions, short phase, Projectile projectile){
+	public Weapon(string[] resources, Size dimensions, short phase, Projectile projectile, float damage){
 		this.sprite = new Sprite(resources, 0);
 		this.dimensions = dimensions;
 		this.phase = phase;
+		this.damage = 35;
 	}
 	
 	#region ICloneable Members

@@ -64,6 +64,28 @@ public class Sprite{
 		if(restingframe_idx == -1) this.restingframe_idx = length-1;
 	}
 
+	private static Dictionary<string, Image> _imageLibrary = new Dictionary<string, Image>();
+	
+	public static Image GetImage(string filepath){
+		filepath = Resources.root + "/" + filepath;
+		
+		if (!_imageLibrary.ContainsKey(filepath))
+			_imageLibrary[filepath] = Image.FromStream(new MemoryStream(File.ReadAllBytes(filepath)));
+
+		return _imageLibrary[filepath];
+	}
+
+	public Sprite(string[] filepaths, int restingframe_idx, int slowness, bool infinite){
+		this._isInfiniteLoop = infinite;
+		this.restingframe_idx = restingframe_idx;
+		this.slowness = slowness;
+
+		foreach(string pre_filepath in filepaths)
+			frames.Add(GetImage(pre_filepath));
+
+		length = frames.Count;
+		if(restingframe_idx == -1) this.restingframe_idx = length-1;
+	}
 
 	public void Trigger(){
 		_isAnimationFinished = false;

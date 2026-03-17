@@ -3,15 +3,14 @@ using System.Drawing.Drawing2D;
 public class Environment{
 
 	public WeaponFootprints weaponFootprints = new WeaponFootprints();
-
 	public Map map;
-
 	public Player p;
-
 	public ObjectsManager All = new ObjectsManager();
+	public List<Prop> props = new List<Prop>();
+
+	//public List<Prop> prop = new List<Props>();
 	
 	/* TODO
-	 * - List organizer
 	 * - Formation rotation
 	 * - Spaw area and regular spawn each 5 minutes if entity number < X
 	 * - Damage and all that
@@ -29,17 +28,16 @@ public class Environment{
 		Game.camera.Follow(p);
 
 		All.Add(new Vehicle());
-		/*nonplayer_entities.Add(new Thug(new Point(300, 300)));
-		nonplayer_entities.Add(new Thug(new Point(300, 500)));
-		nonplayer_entities.Add(new Thug(new Point(300, 700)));*/
+		All.Add(new Thug(new Point(300, 300)));
+		All.Add(new Thug(new Point(300, 500)));
+		All.Add(new Thug(new Point(300, 700)));
 		
 		All.Add(p);
 		
-		fTemp = new Formation();
+		//fTemp = new Formation();
 	}
 	
 	public void Update(){
-		fTemp.Update();
 		foreach(var obj in All)
 			obj.UpdateRoutine();
 	}
@@ -59,6 +57,16 @@ public class Environment{
 		}	
 
 		return 0;
+	}
+
+	public PointF CheckRectangleTileCollision(CollisionCircle cc, PointF speed){
+		RectangleF futureX = new RectangleF(cc.center.X - cc.radius + speed.X, cc.center.Y - cc.radius, 2*cc.radius, 2*cc.radius);
+		if(ResolveRectangleTileCollision(futureX) == 1) speed.X = Math.Sign(speed.X)*0.01f;
+
+		RectangleF futureY = new RectangleF(cc.center.X - cc.radius, cc.center.Y - cc.radius + speed.Y, 2*cc.radius, 2*cc.radius);;
+		if(ResolveRectangleTileCollision(futureY) == 1) speed.Y = Math.Sign(speed.Y)*0.01f; 
+		
+		return speed;
 	}
 
 	private bool ResolveCircleTileCollision(CollisionCircle cc, int tilex, int tiley, int mode){
@@ -99,24 +107,6 @@ public class Environment{
 		return false;
 	}
 	
-	private void UpdatePosition(Object target, PointF movement){
-		target.r.X += movement.X;
-		target.r.Y += movement.Y;
-
-		target.PositionUpdated();
-		CollisionCircle.UpdateCenters(target.hitboxes, movement); 
-	}
-
-	public PointF CheckRectangleTileCollision(CollisionCircle cc, PointF speed){
-		RectangleF futureX = new RectangleF(cc.center.X - cc.radius + speed.X, cc.center.Y - cc.radius, 2*cc.radius, 2*cc.radius);
-		if(ResolveRectangleTileCollision(futureX) == 1) speed.X = Math.Sign(speed.X)*0.01f;
-
-		RectangleF futureY = new RectangleF(cc.center.X - cc.radius, cc.center.Y - cc.radius + speed.Y, 2*cc.radius, 2*cc.radius);;
-		if(ResolveRectangleTileCollision(futureY) == 1) speed.Y = Math.Sign(speed.Y)*0.01f; 
-		
-		return speed;
-	}
-
 	public bool CheckCircleTileCollision(CollisionCircle cc, PointF mov, int mode){
 		float tileSize = map.tileRenderDimension;
 
@@ -152,6 +142,14 @@ public class Environment{
 		float distancesquared = (float)(direction.X*direction.X+direction.Y*direction.Y); 
 		var r = GetCirclesCollisionOverlap(direction, distancesquared, hitbox1.radius, hitbox2.radius);
 		return (r.overlap, r.direction);
+	}
+
+	private void UpdatePosition(Object target, PointF movement){
+		target.r.X += movement.X;
+		target.r.Y += movement.Y;
+
+		target.PositionUpdated();
+		CollisionCircle.UpdateCenters(target.hitboxes, movement); 
 	}
 
 	public Object IsObjectColliding(Object obj, float padding, Func<Object, CollisionCircle, CollisionCircle, int, int> extfunction, int mode){

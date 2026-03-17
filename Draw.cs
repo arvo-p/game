@@ -9,21 +9,31 @@ public class Draw{
 	
 	private void DrawRotated(PaintEventArgs e, Image image, RectangleF r, float rotation){
 		var state = e.Graphics.Save();
-
 		e.Graphics.TranslateTransform((float)(r.Width)/2+r.X, (float)r.Height / 2+r.Y);
 		e.Graphics.RotateTransform(rotation);
-		e.Graphics.DrawImage(image, -r.Width/2, -r.Height/2, r.Width, r.Height); 	
-
+		e.Graphics.DrawImage(image, -r.Width/2, -r.Height/2, r.Width, r.Height);
 		e.Graphics.Restore(state);
-	}	
+	}
+	
+	private GraphicsState DrawRotatedBegin(PaintEventArgs e, Image image, RectangleF r, float rotation){
+		var state = e.Graphics.Save();
+		e.Graphics.TranslateTransform((float)(r.Width)/2+r.X, (float)r.Height / 2+r.Y);
+		e.Graphics.RotateTransform(rotation);
+		e.Graphics.DrawImage(image, -r.Width/2, -r.Height/2, r.Width, r.Height);
+		return state;
+	}
+
+	private void DrawEntity(PaintEventArgs e, Entity ent){
+		var state = DrawRotatedBegin(e, ent.image, ent.r, ent.rotation);
+		if(ent.props != null)
+			foreach(var p in ent.props)
+				e.Graphics.DrawImage(p.image, -p.r.Width/2+p.r.X, -p.r.Height/2+p.r.Y, p.r.Width, p.r.Height);
+		e.Graphics.Restore(state);
+	}
 
 	private void DrawPlayer(PaintEventArgs e, Player player){
-		
 		Graphics g = e.Graphics;
-		//GraphicsState state = g.Save();
-    	//g.TranslateTransform(offsetX, offsetY);
 		DrawRotated(e, player.image, player.r, player.rotation);
-		//g.Restore(state);
 
 		Weapon? weapon = player.selectedWeapon;
 		if(weapon == null) return;
@@ -56,15 +66,15 @@ public class Draw{
 	
 		float offsetX = (windowWidth / 2) - Game.camera.r.X;
     	float offsetY = (windowHeight / 2) - Game.camera.r.Y;
-		
 		e.Graphics.TranslateTransform(offsetX, offsetY);
 		
 		DrawMap(e, env.map);
 
+		foreach(var prp in env.props) e.Graphics.DrawImage(prp.image, prp.r.X, prp.r.Y, prp.r.Width, prp.r.Height);
 		foreach(var obj in env.All.Objects) DrawRotated(e, obj.image, obj.r, obj.rotation);
-		foreach(var obj in env.All.Entities.NPCs) DrawRotated(e, obj.image, obj.r, obj.rotation);
+		foreach(var obj in env.All.Entities.NPCs) DrawEntity(e, obj);
 		foreach(var obj in env.All.Entities.Players) DrawPlayer(e, obj);
-		
+
 		/*
 		 * DEBUG collision
 		Pen myPen = new Pen(Color.Red);
