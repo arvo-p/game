@@ -55,16 +55,16 @@ public static class Tools{
 		return distanceSquared < (combinedradius * combinedradius);
 	}
 
+	public static bool IsCircleColliding(CollisionCircle obj1, CollisionCircle obj2){
+		return IsCircleColliding(obj1.center, obj1.radius, obj2.center, obj2.radius); 
+	}
+
 	public static PointF SwapPointF(PointF p){
 		float holder = p.X;
 		p.X = -p.Y;
 		p.Y = holder;
 
 		return p;
-	}
-
-	public static bool IsCircleColliding(CollisionCircle obj1, CollisionCircle obj2){
-		return IsCircleColliding(obj1.center, obj1.radius, obj2.center, obj2.radius); 
 	}
 
 	// not used

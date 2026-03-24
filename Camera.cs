@@ -1,11 +1,7 @@
 public class Camera{
 	
 	Object follow;
-	public RectangleF r{
-		get{
-			return follow.r;
-		}
-	}
+	public RectangleF r{get => follow.r;}
 
 	public Camera(){}
 

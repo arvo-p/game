@@ -24,7 +24,8 @@ public class Environment{
 	Formation fTemp;
 	public Environment(){
 		Game.env = this;
-		map = new Map(new string[]{"Resources/Tiles/test_Background.csv","Resources/Tiles/test_Decorations.csv","Resources/Tiles/test_Collisions.csv"}, "Resources/Tiles/tilesheet.png");
+		map = new Map(new string[]{"Resources/Tiles/test_Background.csv","Resources/Tiles/test_Decorations.csv",
+				"Resources/Tiles/test_Collisions.csv","Resources/Tiles/test_Buildings.csv"}, "Resources/Tiles/tilesheet.png");
 
 		crosshair = new Crosshair(Resources.UI._crosshair1,Resources.UI._crosshair2);
 		p = new Player(crosshair);

@@ -16,7 +16,7 @@ public class Vehicle : Entity{
 		
 		_sprite = new Sprite(Resources.Vehicle._car);
 		r.Location = new Point(600, 600);
-		r.Size = new Size((int)(110), (int)(220));
+		r.Size = new Size((int)(115), (int)(225));
 		mass = 900;
 		SetCollisionCircles();
 		setHealth(100);

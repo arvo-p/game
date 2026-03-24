@@ -8,48 +8,71 @@ public class Map{
 
 	public Size worldsize;
 
+	public List<Building> buildings = new List<Building>();
 	public Image[] tileMap;
 	public int tileDimension;
 	public int tileRenderDimension;
 
+	public enum Tiles{
+		Empty=-1,
+		Building=4
+	}
+
 	public Map(string[] filepathMap, string filepathTileset){
+		int[,] secondLayer;
+		int[,] buildingsLayer;
+
 		if(File.Exists(filepathMap[0]) == false) throw new Exception("Map file inexistant");
 		if(File.Exists(filepathTileset) == false) throw new Exception("Tileset inexistant");
 
 		var dimension = GetMapDimension(filepathMap[0]);
 
 		map = CreateMapArray(filepathMap[0],dimension);
-		int[,] map_layer2 = CreateMapArray(filepathMap[1],dimension);
-
+		secondLayer = CreateMapArray(filepathMap[1],dimension);
+		buildingsLayer = CreateMapArray(filepathMap[3],dimension);
 		collision = CreateMapArray(filepathMap[2],dimension);
 
 		tileDimension = 128;
 		tileRenderDimension = 64;
 		tileMap = ExtractTiles(filepathTileset, tileDimension);
 
-		gmap = BuildMapImages(map, map_layer2, tileMap);
+		CreateBuildings(buildingsLayer);
+
+		gmap = BuildMapImages(map, secondLayer, tileMap);
 		this.worldsize = new Size(dimension.width*tileRenderDimension, dimension.height*tileRenderDimension);
-
-		/*for(int i=0;i<mapArray.GetLength(0);i++){
-
-		for(int j=0;j<mapArray.GetLength(1);j++){
-			Console.Write(mapArray[i,j]+" ");
-		}
-		}*/
 	}
 
+	void CreateBuildings(int[,] map){
+		int rows = map.GetLength(0); 
+		int cols = map.GetLength(1); 
+		bool[,] visited = new bool[rows, cols];
+		for(int y = 0; y < rows; y++){
+            for(int x = 0; x < cols; x++){
+                if(map[y, x] == 1 && !visited[y, x]){
+					int width = 0;
+					while (x + width < cols && map[y, x + width] == 1) width++;
+
+					int height = 0;
+					while (y + height < rows && map[y + height, x] == 1) height++;
+
+					for (int ry = y; ry < y + height; ry++)
+					for (int rx = x; rx < x + width; rx++)
+					visited[ry, rx] = true;
+					
+					buildings.Add(new Building(y, x, width, height, tileRenderDimension, 270));
+                }
+            }
+        }
+	}
+	
 	Image[,] BuildMapImages(int[,] pmap, int[,] map_layer2, Image[] pTiles){
 		Size mapSize = new Size(tileRenderDimension*map.GetLength(0), tileRenderDimension*map.GetLength(1));
 		int maxColumns = (int)Math.Round((float)mapSize.Width/Game.windowWidth, MidpointRounding.AwayFromZero);
 		int maxRows = (int)Math.Round((float)mapSize.Height/Game.windowHeight, MidpointRounding.AwayFromZero);
 
 		Image[,] mapImages = new Image[maxColumns, maxRows]; 
-		for(int i=0;i<maxColumns;i++){
-			for(int j=0;j<maxRows;j++){
-				mapImages[i,j] = BuildMapImage(pmap, map_layer2, pTiles, i, j, mapSize);
-				Console.WriteLine(i + " " + j + " written");
-			}
-		}
+		for(int i=0;i<maxColumns;i++) for(int j=0;j<maxRows;j++)
+			mapImages[i,j] = BuildMapImage(pmap, map_layer2, pTiles, i, j, mapSize);
 	
 		return mapImages;
 	}
@@ -99,7 +122,6 @@ public class Map{
 	}
 
 	Image[] ExtractTiles(string filepath, int tileSize){
-		
 		Image tileset = Image.FromStream(new MemoryStream(File.ReadAllBytes(filepath)));
 
 		int columns = tileset.Width / tileSize;
@@ -107,11 +129,8 @@ public class Map{
 		
 		Image[] tileMap = new Image[rows*columns];
 
-		for(int r=0; r<rows; r++){
-			for(int c=0;c<columns; c++){
-				tileMap[ (r*columns)+c ] = ExtractTile(tileset, c, r, tileSize);
-			}
-		}
+		for(int r=0; r<rows; r++) for(int c=0;c<columns; c++)
+			tileMap[ (r*columns)+c ] = ExtractTile(tileset, c, r, tileSize);
 		
 		return tileMap;
 	}

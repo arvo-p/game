@@ -19,8 +19,7 @@ public class EntityManager : IEnumerable<Entity>
 
     public int Count => NPCs.Count + Vehicles.Count + Players.Count;
     
-    public Entity GetByIndex(int index)
-    {
+    public Entity GetByIndex(int index){
         if (index < NPCs.Count) return NPCs[index];
 		if (index < NPCs.Count + Vehicles.Count) return Vehicles[index - NPCs.Count];
         return Players[index - NPCs.Count - Vehicles.Count];

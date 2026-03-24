@@ -150,6 +150,10 @@ public class Resources{
 		};
 	}
 
+	public static class Building{
+		public static string[] _wall = {"Tiles/wall.png"};
+	}
+
 	public static class Vehicle{
 		public static string[] _carshadow = {
 			"Vehicle/Shadow.png"

@@ -1,16 +1,20 @@
 public class Object{
-	
 	protected Environment env;
 	
-	public RectangleF r;
-	public float speed;
-	protected bool inverted_vectors=false;
-	protected int mass;
-	protected float friction=0.7f;
-	public List<Prop> props = null;
-
 	public bool isSolid = true;
-	
+
+	public RectangleF r;
+	public float X{get=>r.X;}
+	public float Y{get=>r.Y;}
+	public float Width{get=>r.Width;}
+	public float Height{get=>r.Height;}
+	public float speed;
+	public int mass;
+	protected float friction=0.7f;
+
+	public List<Prop> props = null;
+	protected bool inverted_vectors=false;
+
 	float _rotation;
 	public float rotation{
 		set{
@@ -33,13 +37,8 @@ public class Object{
 	public Sprite _sprite;
 	public Sprite _spriteNext;
 
-	public virtual Sprite sprite{
-		get => _sprite;
-	}
-
-	public Image image{
-		get => sprite.frame;
-	}
+	public virtual Sprite sprite{get => _sprite;}
+    public Image image{get => sprite.frame;}
 
 	public Object(){
 	}
@@ -64,9 +63,7 @@ public class Object{
 	
 		if(speed < 0.2 && speed > -0.2) return;
 		PointF movement = Scalar2Vect_Speed(rotation, speed); 
-		if(this.inverted_vectors){
-			movement = Tools.SwapPointF(movement);
-		}
+		if(this.inverted_vectors) movement = Tools.SwapPointF(movement);
 		env.Move(this, movement);
 		speed *= (float)(friction);
 	}

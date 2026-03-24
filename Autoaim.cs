@@ -32,7 +32,7 @@ public class Autoaim{
 			return SelectNext(dir);
 		}
 
-		float dist = Tools.GetDistanceSquared(parent.r.Location, new PointF(target.r.X, target.r.Y));
+		float dist = Tools.GetDistanceSquared(parent.r.Location, new PointF(target.r.X+target.r.Width/2, target.r.Y+target.r.Height/2));
 
 		PointF difference = new PointF(parent.r.Y-target.r.Y,parent.r.X-target.r.X);
 		float new_aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
