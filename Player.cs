@@ -2,25 +2,28 @@ using System.Windows.Input;
 
 public class Player : Entity{
 	List<Weapon> weapons = new List<Weapon>();
+	public Inventory inventory;
 	
 	short countWeapon = 0;
 	short _idxSelectedWeapon = 0;
 	public short idxSelectedWeapon{get=>_idxSelectedWeapon;set=>_idxSelectedWeapon=value<countWeapon?value:(short)(countWeapon-1);}
-	public Weapon selectedWeapon{get => countWeapon!=0?weapons[_idxSelectedWeapon]:null;}
+	public Weapon? selectedWeapon{get => countWeapon!=0?weapons[_idxSelectedWeapon]:null;}
 
-	Sprite walk;
-	Sprite meleethrow;  
-	Sprite stand;
-	Sprite death;
-	Sprite fire;
-
+	Sprite walk = null!;
+	Sprite meleethrow = null!;  
+	Sprite stand = null!;
+	Sprite death = null!;
+	Sprite fire = null!;
+	
 	Autoaim autoaim;
 	Keyboard mykeyboard;
-
+	public bool isKeyboardOn = true;
+	
+	
 	public Player(Crosshair crosshair){
 		this.env = Game.env;
 
-		mykeyboard = new Keyboard(new Keys[]{Keys.Z, Keys.Q, Keys.S, Keys.D, Keys.E, Keys.Space, Keys.D1, Keys.D2, Keys.D3, Keys.D4});
+		mykeyboard = new Keyboard(new Keys[]{Keys.Z, Keys.Q, Keys.S, Keys.D, Keys.E, Keys.Space, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.R});
 		autoaim = new Autoaim(this, crosshair);
 
 		LoadSprites();
@@ -28,96 +31,77 @@ public class Player : Entity{
 		_spriteNext = stand;
 
 		setHealth(100);
-		
+	
 		r.Location = new Point(0, 0);
-		r.Size = new Size(70, 70);
+		r.Size = new Size(64, 64);
 		mass = 90;
 		SetCollisionCircles();
 
-		weapons.AddRange(
-			(Weapon)env.weaponFootprints.list[4].Clone(this),
-			(Weapon)env.weaponFootprints.list[5].Clone(this),
-			(Weapon)env.weaponFootprints.list[6].Clone(this)
-		);
+		weapons.Add((Weapon)env.weaponFootprints.list[3].Clone(this));
+		weapons.Add((Weapon)env.weaponFootprints.list[4].Clone(this));
+		weapons.Add((Weapon)env.weaponFootprints.list[2].Clone(this));
 		
 		countWeapon = (short)weapons.Count; 
 		idxSelectedWeapon = 3;
+		
+		inventory = new Inventory(this);
 	}
 
 	void LoadSprites(){
 		walk = new Sprite(Resources.Player._walk);
-		meleethrow = new Sprite(Resources.Player._meleethrow,0);
+		meleethrow = new Sprite(Resources.Player._meleethrow,0,4);
 		stand = new Sprite(Resources.Player._stand);
-		death = new Sprite(Resources.Player._death,-1);
-		fire = new Sprite(Resources.Player._fire,0);
+		death = new Sprite(Resources.Player._death,-1,4);
+		fire = new Sprite(Resources.Player._fire,0,4);
 	}
 
-	float attackTimer = 0;
 	bool lastGunHitSuccessful = false;
 	public void StartAttack(){
+ 		Object? victim;
+
 		isAttacking = true;
-		if(countWeapon > 0){
+		if(countWeapon > 0 && selectedWeapon != null){
+			/*  Starts weapon animation and matches
+			 *  the character's speed (slothFactor) to
+			 *  the weapon speed.
+			 *  That way both animation are in sync.
+			 */
 			selectedWeapon.Shoot();
-			Object who = HitscanCheck(this.center, 400);   
-			if(lastGunHitSuccessful = (who != null))
-				who.IsHit(selectedWeapon.damage, rotation);
 			_sprite = fire;
-		}else{
-			attackTimer = 1;
-			sprite.Trigger();
-			_sprite = meleethrow;
+		    _sprite.MatchSlothFactor(selectedWeapon.sprite); 
+			
+			if(selectedWeapon.type == Weapon.Type.Gun){
+				victim = HitscanCheck(this.center, 400);   
+				if(lastGunHitSuccessful = (victim != null)) victim!.IsHit(selectedWeapon.damage, rotation);
+			}else{
+				victim = env.IsObjectColliding(this, 13f, null!, 0);
+				if(victim != null) victim!.IsHit(selectedWeapon.damage, rotation);
+			}
+            return;
 		}
+
+	   	sprite.Trigger();
+	   	_sprite = meleethrow;
+		victim = env.IsObjectColliding(this, 13f, null!, 0);
+		if(victim != null) victim!.IsHit(15, rotation);
+
 		return;
 	}
 
 	private void HandleInput(){
 		mykeyboard.ReadKeys();
-
-		if(mykeyboard.GetKeyOnce(Keys.D1)) idxSelectedWeapon = 0;
-		if(mykeyboard.GetKeyOnce(Keys.D2)) idxSelectedWeapon = 1;
-		if(mykeyboard.GetKeyOnce(Keys.D3)) idxSelectedWeapon = 2;
-		if(mykeyboard.GetKeyOnce(Keys.D4)) idxSelectedWeapon = 3;
+		
+		if(mykeyboard.GetKeyOnce(Keys.R))
+			if(selectedWeapon != null) selectedWeapon.Reload();
 
 		if(autoaim.isAutoaiming){
-			if(mykeyboard.GetKeyOnce(Keys.Q)){
-				autoaim.SelectNext(-1);
-			}
-
-			if(mykeyboard.GetKeyOnce(Keys.D)){
-				autoaim.SelectNext(1);
-			}
+			if(mykeyboard.GetKeyOnce(Keys.Q)) autoaim.SelectNext(-1);
+			if(mykeyboard.GetKeyOnce(Keys.D)) autoaim.SelectNext(1);
+		}else{
+			if(mykeyboard.GetKey(Keys.Q)) rotation -= 7;
+			if(mykeyboard.GetKey(Keys.D)) rotation += 7;
 		}
 
-		if(isAttacking){
-			if(selectedWeapon.sprite.isAnimationFinished){
-				selectedWeapon.EndShoot();
-				isAttacking = false;
-			}
-			return;
-		}
-
-		if(mykeyboard.GetKey(Keys.Q))
-			rotation -= 7;
-
-		if(mykeyboard.GetKey(Keys.D))
-			rotation += 7;
-		
-		if(mykeyboard.GetKey(Keys.Space)){
-			if(lastGunHitSuccessful == false){
-				autoaim.UpdateList();
-				if(!autoaim.SelectNext(0))
-				StartAttack();
-			}
-			StartAttack();
-			speed = 0;
-			return;
-		}
-
-		if(mykeyboard.GetKeyOnce(Keys.E)){
-			bool leave = ActionKey();
-			if(leave) return;
-		}
-		
 		if(mykeyboard.GetKey(Keys.Z)){
 			lastGunHitSuccessful = false;
 			autoaim.Set(false);
@@ -130,25 +114,56 @@ public class Player : Entity{
 			speed -= 3;
 		}
 
+		if(isAttacking){
+			if(selectedWeapon != null && selectedWeapon.sprite.isAnimationFinished){
+				selectedWeapon.EndShoot();
+				isAttacking = false;
+			}
+			return;
+		}
+		
+		if(mykeyboard.GetKeyOnce(Keys.D1)) idxSelectedWeapon = 0;
+		if(mykeyboard.GetKeyOnce(Keys.D2)) idxSelectedWeapon = 1;
+		if(mykeyboard.GetKeyOnce(Keys.D3)) idxSelectedWeapon = 2;
+		if(mykeyboard.GetKeyOnce(Keys.D4)) idxSelectedWeapon = 3;
+
+		if(mykeyboard.GetKey(Keys.Space)){
+			if(speed < 0.3){
+				if(!(autoaim.isAutoaiming == true && autoaim.crosshair.isLockedOnTarget == false)){ //test
+					if(lastGunHitSuccessful == false && selectedWeapon.type != Weapon.Type.Melee){
+						autoaim.UpdateList();
+						if(!autoaim.SelectNext(0))
+						StartAttack();
+					}
+					StartAttack();
+					speed = 0;
+					return;
+				}
+			} else StartAttack();
+		}
+
+		if(mykeyboard.GetKeyOnce(Keys.E)) if(ActionKey()) return;
+	
 		speed = Math.Clamp(speed, -15, 15);
 	}
 
 	private bool ActionKey(){
-		Object collided = env.IsObjectColliding(this, 10f, null, 0);
-		if(collided != null){
-			if(collided.GetType().Name == "Vehicle"){
-				Vehicle vehicle = (Vehicle)collided;
-				vehicle.MountPassenger(this,mykeyboard);
-				mykeyboard = null;
-				return true;
-			}
+		Object? collided = env.IsObjectColliding(this, 10f, null!, 0);
+		if(collided == null) return false;
+		if(collided is Vehicle vehicle){
+			inside = vehicle;
+			vehicle.MountPassenger(this,mykeyboard);
+			isKeyboardOn = false;
+			env.All.Remove(this);
+			return true;
 		}
 		return false;
 	}
 
 	private Sprite UpdateSprite(){
+		if(isAttacking && Math.Abs(speed) < 0.3) return fire; 
 		if(isDead) return death;
-		if(speed > 0.2 || speed < -0.2) return walk;
+		if(Math.Abs(speed) > 0.3) return walk;
 		return stand;
 	}
 
@@ -160,8 +175,12 @@ public class Player : Entity{
 			this.rotation += diff*lerpFactor;
 		}
 
-		if(mykeyboard != null) HandleInput();
-		if(isAttacking == false)
-			_sprite = UpdateSprite();
+		if(isKeyboardOn == true) HandleInput();
+		_sprite = UpdateSprite();
+	}
+
+	public void TakeItem(ItemDrop item){
+		item.TakeMe(this);
+		env.All.Remove(item); 
 	}
 }

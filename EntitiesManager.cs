@@ -25,6 +25,12 @@ public class EntityManager : IEnumerable<Entity>
         return Players[index - NPCs.Count - Vehicles.Count];
     }
 
+	public void Remove(Entity entity){
+        if(entity is Player player) Players.Remove(player);
+        else if(entity is Vehicle vehicle) Vehicles.Remove(vehicle);
+		else NPCs.Remove(entity);
+    }
+
 	public void Add(Entity entity){
         if(entity is Player player) Players.Add(player);
         else if(entity is Vehicle vehicle) Vehicles.Add(vehicle);

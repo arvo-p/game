@@ -8,9 +8,20 @@ public static class Tools{
 			   LineIntersectsLine(p1, p2, new PointF(r.Right, r.Top), new PointF(r.Right, r.Bottom));
 	}
 
-	public static float RandomFloat(int min, int max){
-		int diff = max-min;
+	public static float RandomFloat(float min, float max){
+		float diff = max-min;
 		return (Random.Shared.NextSingle() * (float)diff)+(float)min;
+	}
+
+	public static void Shuffle<T>(this IList<T> list){
+		int n = list.Count;
+		while (n > 1) {
+			n--;
+			int k = Game.rand.Next(n + 1);
+			T value = list[k];
+			list[k] = list[n];
+			list[n] = value;
+		}
 	}
 
 	public static bool IsColliding(RectangleF a, RectangleF b){
@@ -53,6 +64,15 @@ public static class Tools{
 		float distanceSquared = (dx * dx) + (dy * dy);
 
 		return distanceSquared < (combinedradius * combinedradius);
+	}
+
+	public static PointF Scalar2Vect_Speed(float rot, float scalarspeed){
+		double rot_radians = (rot)*0.0174533; 
+		PointF speed = new PointF(
+			(float)(scalarspeed*Math.Cos(rot_radians)),
+			(float)(scalarspeed*Math.Sin(rot_radians))
+		);
+		return speed;
 	}
 
 	public static bool IsCircleColliding(CollisionCircle obj1, CollisionCircle obj2){

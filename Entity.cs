@@ -1,11 +1,15 @@
 public class Entity : Object{
 	
-	protected bool isAttacking = false;
+	public bool isAttacking = false;
 	public bool isDead = false;
+	public bool isDown = false;
 	protected bool isStunned = false;
 	protected bool doUpdateSprite = false;
 	
 	protected float maxspeed;
+
+	// If entity is _inside_ a vehicle
+	public Entity? inside = null;
 	
 	int _health;
 	public int maxhealth;
@@ -15,14 +19,35 @@ public class Entity : Object{
 			if(value < 0){
 				_health=0;
 				if(isDead == false) doUpdateSprite = true;
-				isDead = true;
+				Die();
+				DropItem();
 			}
 			else if(value > maxhealth) _health=maxhealth;
 			else _health = value;
 		}
 	}
 
-	public Object HitscanCheck(PointF start, float range){
+	protected DateTime isDownTime = DateTime.Now;
+
+	public virtual void TryGetUp(){
+		if((DateTime.Now - isDownTime).TotalSeconds > 5)
+			PutDown(false);
+	}
+
+	public virtual void PutDown(bool state){
+     	doUpdateSprite = true;
+		isDown = state;
+		if(state) isDownTime = DateTime.Now;
+	}
+
+	public virtual void Die(){
+		isDead = true;
+	}
+	
+	public virtual void DropItem(){
+	}
+
+	public Object? HitscanCheck(PointF start, float range){
 		float angle;
 		angle = this.rotation*0.0174533f;
 
@@ -38,10 +63,11 @@ public class Entity : Object{
 		}
 
 		float closestDistance = float.MaxValue;
-		Object closestHit = null;
+		Object? closestHit = null;
 
 		foreach(var obj in env.All){
 			if(obj == this) continue;
+			if(obj is Entity ent) if(ent.isDead) continue;
 			if(Tools.IsLineIntersectingRect(start, targetPoint, obj.r)){
 				float dist = Tools.GetDistance(start, new PointF(obj.r.X, obj.r.Y));
 				if(dist < closestDistance){
@@ -68,8 +94,5 @@ public class Entity : Object{
 	}
 
 	public override void IsHit(float damage, float rotation){
-	}
-
-	public override void Update(){
 	}
 }

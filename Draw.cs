@@ -5,6 +5,10 @@ public class Draw{
 	Environment env;
 	int windowWidth;
 	int windowHeight;
+
+	// 3D
+	private PointF sun = new PointF(2.8f, 3.0f);
+	private float perspectiveFactor = 0.2f; 
 	
 	private Matrix cameraMatrix = new Matrix(); 
 	private Matrix m = new Matrix();
@@ -27,13 +31,43 @@ public class Draw{
 				e.Graphics.DrawImage(p.image, -p.r.Width/2+p.r.X, -p.r.Height/2+p.r.Y, p.r.Width, p.r.Height);
 		e.Graphics.Restore(state);
 	}
+
+	Sprite ammoPanel = new Sprite(Resources.UI._ammopanel);
+	private void PrintAmmo(PaintEventArgs e){
+		if(Game.camera.follow is not Player p) return;
+		Graphics g = e.Graphics;
+
+		RectangleF rPanel = new RectangleF(Game.windowWidth - ammoPanel.frame.Width * 1.4f - 5, 10, ammoPanel.frame.Width * 1.4f, ammoPanel.frame.Height * 1.4f);
+		g.DrawImage(ammoPanel.frame, rPanel.X, rPanel.Y, rPanel.Width, rPanel.Height);
+
+		using(Font font = new Font(Resources.Font._pfc.Families[0], 11, FontStyle.Bold))
+			using(Brush brush = new SolidBrush(Color.Black)){
+				string[] texts = {
+					$"{p.inventory.bullets}",
+					$"{p.inventory.shells}",
+					$"{p.inventory.smallbullets}",
+					$"{p.inventory.grenades}",
+					$"{p.inventory.rockets}",
+					$"{p.inventory.batteries}"
+				};
+				if(p.inventory != null){
+					for(int i=0;i<texts.Count();i++)
+						g.DrawString(texts[i], font, brush, rPanel.X + 25 - 17*(texts[i].Length-1)/2+86*(i%3), rPanel.Y + 45 + 45*(i/3));
+				}
+				if(p.selectedWeapon != null){
+					if(p.selectedWeapon.icon != null)
+					   g.DrawImage(p.selectedWeapon.icon.frame, rPanel.X + rPanel.Width - 105, 20, 65, 65);
+					string text = $"-";
+					if(p.selectedWeapon.type != Weapon.Type.Melee)
+						text = $"{p.selectedWeapon.currentClip}";
+					g.DrawString(text, font, brush, rPanel.X + 335 - 17*(text.Length-1)/2, rPanel.Y + 93);
+				}
+			}
+	}
 	
 	private void DrawBuildings(PaintEventArgs e, List<Building> buildings){
 		Graphics g = e.Graphics;
 		RectangleF camera = Game.camera.r;
-
-		float perspectiveFactor = 0.2f; 
-		float ledgeThickness = 5f;
 	
 		int screenCX = windowWidth / 2;
 		int screenCY = windowHeight / 2;
@@ -43,10 +77,6 @@ public class Draw{
 											 windowWidth + 500, 
 											 windowHeight + 500);
 
-		/*var visibleBuildings = buildings.Where(b => 
-			viewport.IntersectsWith(new RectangleF(b.X, b.Y, b.Width, b.Height))
-		).ToList();*/
-		
 		var visibleBuildings = buildings.Where(b => Tools.IsColliding(viewport, new RectangleF(b.X, b.Y, b.Width, b.Height))).ToList();
 
 		var sortedBuildings = visibleBuildings.OrderByDescending(b => {
@@ -58,12 +88,11 @@ public class Draw{
     	}).ToList();
 		
 		foreach (var b in sortedBuildings){
-			PointF sun = new PointF(2.8f, 3.0f);
 			PointF worldBase = new PointF(b.X, b.Y);
 			PointF distFromCam = new PointF(b.X - Game.camera.r.X, b.Y - Game.camera.r.Y);
 			PointF offset = new PointF(
-					distFromCam.X * perspectiveFactor * (b.Height / 50f),
-				    distFromCam.Y * perspectiveFactor * (b.Height / 50f)
+					distFromCam.X * perspectiveFactor * (b.Height3D / 60f),
+				    distFromCam.Y * perspectiveFactor * (b.Height3D / 60f)
 			);
 
 			RectangleF baseRect = new RectangleF(worldBase.X, worldBase.Y , b.Width, b.Height);
@@ -105,46 +134,60 @@ public class Draw{
 				new PointF(baseRect.Right, baseRect.Bottom),
 				new PointF(baseRect.Left, baseRect.Bottom)
 			};
-			
-			RectangleF srcRect = new RectangleF(0, 0, b.wall.frame.Width, b.wall.frame.Height);
+		
+			RectangleF srcRect;
 			using (Brush shadowBrush = new SolidBrush(Color.FromArgb(80, 0, 0, 0))){
 				if(roofRect.Left > baseRect.Left){
-					g.DrawImage(b.wall.frame, new PointF[]{leftWallPoints[0], leftWallPoints[1], leftWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
+					srcRect = new RectangleF(0, 0, b.Lwall.frame.Width, b.Lwall.frame.Height);
+					g.DrawImage(b.Lwall.frame, new PointF[]{leftWallPoints[0], leftWallPoints[1], leftWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
 				}
 				if(roofRect.Top > baseRect.Top){
-					g.DrawImage(b.wall.frame, new PointF[]{frontWallPoints[0], frontWallPoints[1], frontWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
+					srcRect = new RectangleF(0, 0, b.Uwall.frame.Width, b.Uwall.frame.Height);
+					g.DrawImage(b.Uwall.frame, new PointF[]{frontWallPoints[0], frontWallPoints[1], frontWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
 				}
 				if(roofRect.Right < baseRect.Right){
-					g.DrawImage(b.wall.frame, new PointF[]{rightWallPoints[0], rightWallPoints[1], rightWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
+					srcRect = new RectangleF(0, 0, b.Rwall.frame.Width, b.Rwall.frame.Height);
+					g.DrawImage(b.Rwall.frame, new PointF[]{rightWallPoints[0], rightWallPoints[1], rightWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
 					g.FillPolygon(shadowBrush, rightWallPoints);
 				}
 				if(roofRect.Bottom < baseRect.Bottom){
-					g.DrawImage(b.wall.frame, new PointF[]{botWallPoints[0], botWallPoints[1], botWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
+					srcRect = new RectangleF(0, 0, b.Lwall.frame.Width, b.Lwall.frame.Height);
+					g.DrawImage(b.Lwall.frame, new PointF[]{botWallPoints[0], botWallPoints[1], botWallPoints[3]}, srcRect, GraphicsUnit.Pixel);
 					g.FillPolygon(shadowBrush, botWallPoints);
 				}
 			}
 
+			float ledgeThickness = 5f;
+			ledgeThickness = 2 + (b.Height3D / 10);
 			RectangleF innerRoof = new RectangleF(
 				roofRect.X + ledgeThickness, 
 				roofRect.Y + ledgeThickness, 
 				roofRect.Width - (ledgeThickness * 2), 
 				roofRect.Height - (ledgeThickness * 2)
 			);
-			
+	
 			g.FillRectangle(Brushes.Gray, roofRect);
+			
+			if(b.roof != null){
+				float viewPct = 0.7f; 
+				float srcW = b.roof.frame.Width * viewPct;
+				float srcH = b.roof.frame.Height * viewPct;
 
-			/*
-			float parallaxShiftX = (roofRect.X - screenCX) * 0.05f; 
-			float parallaxShiftY = (roofRect.Y - screenCY) * 0.05f;
+				float maxShiftX = b.roof.frame.Width - srcW + 0.1f;
+				float maxShiftY = b.roof.frame.Height - srcH + 0.1f;
 
-			RectangleF parallaxSrcRect = new RectangleF(
-				parallaxShiftX, 
-				parallaxShiftY, 
-				roofTexture.Width, 
-				roofTexture.Height
-			);
-			g.DrawImage(roofTexture, innerRoof, parallaxSrcRect, GraphicsUnit.Pixel);
-			*/
+				float pctX = Math.Clamp((roofRect.X / windowWidth), 0, 1);
+				float pctY = Math.Clamp((roofRect.Y / windowHeight), 0, 1);
+
+				RectangleF manualSrcRect = new RectangleF(
+					pctX * maxShiftX, 
+					pctY * maxShiftY, 
+					srcW, 
+					srcH
+				);
+
+				g.DrawImage(b.roof.frame, innerRoof, manualSrcRect, GraphicsUnit.Pixel);
+			}
 
 			using(Pen darkPen = new Pen(Color.FromArgb(120, 0, 0, 0), 2)){
 				g.DrawLine(darkPen, innerRoof.Left, innerRoof.Top, innerRoof.Right, innerRoof.Top);
@@ -191,19 +234,52 @@ public class Draw{
 		e.Graphics.Restore(initialState);
 	}
 
+	DateTime startTime = DateTime.Now;
 	private void DrawPlayer(PaintEventArgs e, Player player){
 		Graphics g = e.Graphics;
 		DrawRotated(e, player.image, player.r, player.rotation);
 
 		Weapon? weapon = player.selectedWeapon;
+		PointF weaponMovementVect = player.r.Location;
 		if(weapon == null) return;
-		DrawRotated(e, weapon.image, player.r, player.rotation);
+		if(player.speed > 0.2){
+			float weaponMovement = (float)Math.Sin((DateTime.Now-startTime).TotalSeconds * 20) * 4f;
+			var add = Tools.Scalar2Vect_Speed(player.rotation, weaponMovement);	
+			weaponMovementVect.X += add.X;
+			weaponMovementVect.Y += add.Y;
+		}
+		DrawRotated(e, weapon.image, new RectangleF(weaponMovementVect.X, weaponMovementVect.Y, player.Width, player.Height), player.rotation);
 	}
 	
 	private void DrawCrosshair(PaintEventArgs e, Crosshair c){
 		e.Graphics.DrawImage(c.image, c.r.X, c.r.Y, c.r.Width, c.r.Height);
 	}
 	
+	private void DrawItem(PaintEventArgs e, ItemDrop item){
+		float floatHeight = item.floatY;
+		PointF ground = new PointF(item.X, item.Y+item.Height);
+		PointF offset = new PointF((ground.X - Game.camera.r.X) * perspectiveFactor * 0.5f, (ground.Y - Game.camera.r.Y) * perspectiveFactor * 0.5f);
+		PointF shadow = new PointF(ground.X + offset.X + (floatHeight * sun.X * 0.2f), ground.Y + offset.Y + (floatHeight * sun.Y * 0.2f));
+
+		float shadowScale = Math.Max(0.5f, 1.0f - (floatHeight / 100f));
+		int shadowAlpha = (int)Math.Max(0, 110 - (floatHeight * 2));
+
+		float sW = item.Width * shadowScale;
+		float sH = (item.Height / 2f) * shadowScale;
+		
+		GraphicsPath shadowPath = new GraphicsPath();
+		shadowPath.AddEllipse(shadow.X - (sW / 2), shadow.Y - (sH / 2), sW, sH);
+
+		using (PathGradientBrush pgb = new PathGradientBrush(shadowPath)) {
+			pgb.CenterColor = Color.FromArgb(shadowAlpha, 0, 0, 0);
+			pgb.SurroundColors = new Color[] { Color.FromArgb(0, 0, 0, 0) };
+			pgb.CenterPoint = new PointF(shadow.X, shadow.Y);
+			e.Graphics.FillPath(pgb, shadowPath);
+		}
+
+		e.Graphics.DrawImage(item.image, item.X, item.Y+item.floatY, item.Width, item.Height);
+	}
+
 	private void DrawMap(PaintEventArgs e, Map map){
 		int currentI = (int)Math.Floor(Game.camera.r.X/(Game.windowWidth));
 		int currentJ = (int)Math.Floor(Game.camera.r.Y/(Game.windowHeight));
@@ -245,8 +321,15 @@ public class Draw{
 		foreach(var obj in env.All.Entities.NPCs) DrawEntity(e, obj);
 		foreach(var obj in env.All.Entities.Vehicles) DrawVehicle(e, obj);
 		foreach(var obj in env.All.Entities.Players) DrawPlayer(e, obj);
+		foreach(var obj in env.All.Items) DrawItem(e, obj);
 		
 		DrawBuildings(e, env.map.buildings);
+		
+		cameraMatrix.Reset();
+		e.Graphics.Transform = cameraMatrix;
+		// UI
+		
+		PrintAmmo(e);
 
 		/*
 		 * DEBUG collision

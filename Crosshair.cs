@@ -3,6 +3,8 @@ public class Crosshair{
 	public RectangleF r;
 	
 	bool hasTarget=false;
+	public bool isLockedOnTarget=false;
+
 	PointF target;
 	
 	Sprite onTarget;
@@ -22,9 +24,8 @@ public class Crosshair{
 		sprite = defaultC;
 	}
 
-	float speed = 0;
 	public void Update(){
-		if(hasTarget == false) return;
+		if(hasTarget == false || isLockedOnTarget == true) return;
 		float lerpFactor = 0.15f;
 
 		PointF diff = new PointF(target.X - r.X, target.Y - r.Y);
@@ -34,11 +35,13 @@ public class Crosshair{
 		if(Math.Abs(diff.Y) < 4 && Math.Abs(diff.X) < 4){
 			sprite = onTarget;
 			hasTarget = false;
+			isLockedOnTarget = true;
 		}
 	}
 
 	public void NewTarget(float x, float y){
 		hasTarget = true;
+		isLockedOnTarget = false;
 		sprite = defaultC; 
 		target = new PointF(x-r.Width/2, y-r.Height/2);
 	}

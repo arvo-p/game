@@ -1,5 +1,14 @@
+using System.Drawing.Text;
+
 public class Resources{
 	public static string root = "Resources";
+	
+	public static class Font{
+		public static PrivateFontCollection _pfc = new PrivateFontCollection();
+		public static void Load(){
+			_pfc.AddFontFile(root+"/Font/bank gothic medium bt.ttf");
+		}
+	}
 
 	public static class Player{
 		public static string[] _stand = {
@@ -110,12 +119,48 @@ public class Resources{
 	}
 	
 	public static class UI{
+		public static string[] _ammopanel = {
+			"UI/ammunition.png"
+		};
 		public static string[] _crosshair1 = {
 			"UI/Crosshair.png"
 		};
 		public static string[] _crosshair2 = {
 			"UI/Crosshair1.png"
 		};
+
+		public static string[] ASE_BYPASSER1 = {
+         	"UI/ASE_BYPASSER1.png"
+		};
+		public static string[] ASE_KIRVES1 = {
+         	"UI/ASE_KIRVES1.png"
+		};
+		public static string[] ASE_KONSU1 = {
+         	"UI/ASE_KONSU1.png"
+		};
+		public static string[] ASE_KRANU1 = {
+         	"UI/ASE_KRANU1.png"
+		};
+		public static string[] ASE_PISTOOLI1 = {
+         	"UI/ASE_PISTOOLI1.png"
+		};
+		public static string[] ASE_SALAMA1 = {
+         	"UI/ASE_SALAMA1.png"
+		};
+		public static string[] ASE_SINKO1 = {
+         	"UI/ASE_SINKO1.png"
+		};
+		public static string[] ASE_SHOTGUN = {
+			"UI/Weaponicon_shotgun.png"
+	 	};
+	}
+
+	public static class Item{
+		public static string _bullet = "Items/Item_bullets.png";
+		public static string _rockets = "Items/Item_rockets.png";
+		public static string _rocket = "Items/Item_rocket.png";
+		public static string _shells = "Items/Item_shells.png";
+		public static string _smallbullets= "Items/Item_smallbullets.png";
 	}
 
 	public static class Thug{
@@ -150,8 +195,61 @@ public class Resources{
 		};
 	}
 
-	public static class Building{
-		public static string[] _wall = {"Tiles/wall.png"};
+	public static class Merc{
+		public static string[] _walk = {
+			"Merc/Mercwalk1.png",
+			"Merc/Mercwalk2.png",
+			"Merc/Mercwalk3.png",
+			"Merc/Mercwalk4.png",
+			"Merc/Mercwalk5.png",
+			"Merc/Mercwalk6.png",
+			"Merc/Mercwalk7.png",
+			"Merc/Mercwalk8.png"
+		};
+		public static string[] _stand = {
+			"Merc/Mercstand1.png"
+		};
+		public static string[] _shoot = {
+			"Merc/Mercattack1.png",
+			"Merc/Mercattack2.png",
+			"Merc/Mercattack3.png"
+		};
+		public static string[] _death = {
+			"Merc/Mercdeath1.png",
+			"Merc/Mercdeath2.png",
+			"Merc/Mercdeath3.png",
+			"Merc/Mercdeath4.png"
+		};
+	}
+
+	public static class Doctor{
+		public static string[] _walk = {
+			"Doctor/MadFatDoctor_walk1.png",
+			"Doctor/MadFatDoctor_walk2.png",
+			"Doctor/MadFatDoctor_walk3.png",
+			"Doctor/MadFatDoctor_walk4.png",
+			"Doctor/MadFatDoctor_walk5.png",
+			"Doctor/MadFatDoctor_walk6.png",
+			"Doctor/MadFatDoctor_walk7.png",
+			"Doctor/MadFatDoctor_walk8.png",
+			"Doctor/MadFatDoctor_walk9.png",
+			"Doctor/MadFatDoctor_walk10.png"
+		};
+		public static string[] _stand = {
+			"Doctor/MadFatDoctor_stand.png"
+		};
+		public static string[] _fire = {
+			"Doctor/MadFatDoctor_fire1.png",
+			"Doctor/MadFatDoctor_fire2.png",
+			"Doctor/MadFatDoctor_fire3.png"
+		};
+		public static string[] _death = {
+			"Doctor/MadFatDoctor_death1.png",
+			"Doctor/MadFatDoctor_death2.png",
+			"Doctor/MadFatDoctor_death3.png",
+			"Doctor/MadFatDoctor_death4.png",
+			"Doctor/MadFatDoctor_death5.png"
+		};
 	}
 
 	public static class Vehicle{
@@ -169,6 +267,62 @@ public class Resources{
 		};
 		public static string[] _taxi = {
 			"Vehicle/taxi.png"
+		};
+	}
+	
+	public static class Building{
+		public static string[] _mcgurkWall = {
+			"Tiles/Buildings/mcgurk_wall1.png",
+			"Tiles/Buildings/mcgurk_wall2.png",
+			"Tiles/Buildings/mcgurk_wall3.png"
+		};
+		public static string[] _mcgurkRoof = {
+			"Tiles/Buildings/mcgurk_roof.png"
+		};
+
+		public static string[] _hotelWall = {
+			"Tiles/Buildings/hotel_wall1.png",
+			"Tiles/Buildings/hotel_wall2.png",
+			"Tiles/Buildings/hotel_wall3.png"
+		};
+		public static string[] _hotelRoof = {
+			"Tiles/Buildings/hotel_roof.png"
+		};
+
+		public static string[] _museumWall = {
+			"Tiles/Buildings/museum_wall1.png",
+			"Tiles/Buildings/museum_wall2.png",
+			"Tiles/Buildings/museum_wall3.png"
+		};
+		public static string[] _museumRoof = {
+			"Tiles/Buildings/museum_roof.png"
+		};
+
+		public static string[] _retailWall = {
+			"Tiles/Buildings/retail_wall1.png",
+			"Tiles/Buildings/retail_wall2.png",
+			"Tiles/Buildings/retail_wall3.png"
+		};
+		public static string[] _retailRoof = {
+			"Tiles/Buildings/retail_roof.png"
+		};
+
+		public static string[] _retail2Wall = {
+			"Tiles/Buildings/retail2_wall1.png",
+			"Tiles/Buildings/retail2_wall2.png",
+			"Tiles/Buildings/retail2_wall3.png"
+		};
+		public static string[] _retail2Roof = {
+			"Tiles/Buildings/retail_roof.png"
+		};
+
+		public static string[] _retail3Wall = {
+			"Tiles/Buildings/retail3_wall1.png",
+			"Tiles/Buildings/retail3_wall2.png",
+			"Tiles/Buildings/retail3_wall3.png"
+		};
+		public static string[] _retail3Roof = {
+			"Tiles/Buildings/retail_roof.png"
 		};
 	}
 }

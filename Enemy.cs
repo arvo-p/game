@@ -1,27 +1,41 @@
 public class Enemy : Entity{
 
-	public Sprite walk;
-	public Sprite shoot;  
-	public Sprite stand;
-	public Sprite dead;
+	public Sprite walk = null!;
+	public Sprite shoot = null!;  
+	public Sprite stand = null!;
+	public Sprite dead = null!;
 
-	protected Player local_player;
+	protected Player local_player = null!;
+
+	protected Pathfinding pathf = new Pathfinding();
+	protected List<Point>? path = null;
 
 	protected bool isActionInProgress = false;
 	protected float aiming_rotation;
 	
-	PointF velRepulsion = new PointF(0,0);
-
 	public float tAttack = 1;
 	public float tStun = 1;
 	
-	protected Formation myFormation = null;
 	public bool hasPosTarget=false;
 	public PointF posTarget = new PointF();
-
+ 
+	protected List<PointF>? currentPath = null;
+	DateTime dtRefreshPath=DateTime.Now;
+	
 	public void Action(){
+		Entity target = local_player.inside==null?local_player:local_player.inside;
 
-		PointF difference = new PointF(this.r.Y-local_player.r.Y,this.r.X-local_player.r.X);
+		if((dtRefreshPath-DateTime.Now).TotalSeconds > 1){
+			dtRefreshPath = DateTime.Now;
+			currentPath = pathf.FindPath((int)this.X, (int)this.Y, (int)target.X, (int)target.Y); 
+		}
+
+		PointF nextPoint = new PointF(target.X,target.Y); 
+		if(currentPath != null && currentPath.Count > 0){
+			nextPoint = currentPath[0];
+		}
+		
+		PointF difference = new PointF(this.Y-nextPoint.Y,this.X-nextPoint.X);
 		aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
 
 		if(this.rotation-aiming_rotation > 180){
@@ -35,32 +49,19 @@ public class Enemy : Entity{
 			else return;
 		}
 		
-		/*
-		 * NOT WORKING YET
-		 * foreach(var other in env.nonplayer_entities){
-    		float distsq = Tools.GetDistanceSquared(this.r.Location, other.r.Location);
-    		if(distsq < 10000){
-				if(distsq < 2){
-					velRepulsion = new PointF(2, 2);
-					continue;
-				}
-				float dist = (float)Math.Sqrt(distsq);
-				PointF normDiff = new PointF((this.r.X-other.r.X)/dist, (this.r.Y-other.r.Y)/dist);
-        		velRepulsion.X += normDiff.X*3;
-        		velRepulsion.Y += normDiff.Y*3;
-    		}
-		}*/
-
 		if(isActionInProgress){
 			tAttack+=-0.052f;
 			if(tAttack <= 0) isActionInProgress = false;
 			else return;
 		}
 		
-		float distance = Tools.GetDistanceSquared(local_player.r.Location, this.r.Location);
+		float distance = Tools.GetDistanceSquared(target.r.Location, this.r.Location);
 		if(distance > 90000){
 			if(_sprite != walk) _sprite = walk;
 			speed = Math.Clamp(speed + 1, -3, 3);
+			if(currentPath != null && currentPath.Count > 0 && Math.Abs(this.X - nextPoint.X) < 40 && Math.Abs(this.Y-nextPoint.Y)<40){
+				currentPath.RemoveAt(0);
+			}
 		}else{
 			if(_sprite != shoot) _sprite = shoot;
 			isActionInProgress = true;
@@ -70,22 +71,10 @@ public class Enemy : Entity{
 		}
 	}
 
-	public void ActionFormation(){
-		if(hasPosTarget == false) return;
-
-		PointF difference = new PointF(this.r.Y-posTarget.Y,this.r.X-posTarget.X);
-		aiming_rotation = ((float)Math.Atan2(difference.X, difference.Y)*180f)/3.14f+180;
-
-		if(this.rotation-aiming_rotation > 180){
-			this.rotation -= 180;
-			speed *= -1;
-		}
-
-		float distance = Tools.GetDistanceSquared(local_player.r.Location, this.r.Location);
-		if(distance > 0){
-			if(_sprite != walk) _sprite = walk;
-			speed = Math.Clamp(speed + 1, -3, 3);
-		}
+	public override void DropItem(){
+		var rand = new Random();
+		if(rand.Next(0, 6)==0)
+			env.All.Add(new ItemDrop(this.X, this.Y, ItemDropFootprints.SelectRandom()));
 	}
 
 	public override void IsHit(float damage, float rotation){
@@ -102,36 +91,63 @@ public class Enemy : Entity{
 		Blood.SprayBlood(r.Location, new PointF((float)Math.Cos(radians),(float)Math.Sin(radians)));
 	}
 
-	public override void UpdateRoutine(){
+	private Sprite UpdateSprite(){
+		if(isDead) return dead;
+		if(isDown) return dead;
+		if(isActionInProgress) return shoot;
+		if(Math.Abs(speed) > 0.2f) return walk;
+		return stand;
+	}
+	
+	public void ActionFormation(){
+		// TO-DO
+		// Maybe later
+	}
+
+	public override void Update(){
 		if(isDead){
 			if(doUpdateSprite){
 				doUpdateSprite = false;
-				Update();
+				_sprite = UpdateSprite();
 				_sprite.Trigger();
 			}
 			return;
 		}
+		
+		if(isDown){
+			if(doUpdateSprite){
+				doUpdateSprite = false;
+				_sprite = UpdateSprite();
+				_sprite.SetFrame(-1);
+			}
+			TryGetUp();
+			return;
+		}
 
+		_sprite = UpdateSprite();
 
-		if(myFormation == null) Action();
-		else ActionFormation();
+ 		Action();
 
 		this.rotation = aiming_rotation;
-
-		if(this.rotation < aiming_rotation) this.rotation += 5;
-		if(this.rotation > aiming_rotation) this.rotation -= 5;
-		
-		if(speed < 0.2 && speed > -0.2) return;
-		
-		PointF movement = Scalar2Vect_Speed(rotation, speed); 
-		movement.X += velRepulsion.X;
-		movement.Y += velRepulsion.Y;
-
-		if(this.inverted_vectors) movement = Tools.SwapPointF(movement);
-		env.Move(this, movement);
-		speed *= (float)(friction);
 	}
 	
+	protected void Init(){
+		this.env = Game.env;
+		this.local_player = env.p;
+
+		r.Size = new Size(64, 64);
+		setHealth(100);
+		LoadSprites();
+		_sprite = stand;
+
+		mass = 90;
+
+		PositionUpdated();
+		SetCollisionCircles();
+	}
+	
+	protected virtual void LoadSprites(){} 
+
 	public Enemy(){
 
 	}

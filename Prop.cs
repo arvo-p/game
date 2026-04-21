@@ -1,5 +1,5 @@
 public class Prop{
-	public Environment env;
+	public Environment env = null!;
 	public Sprite sprite;
 	public RectangleF r;
 	public float rotation;
@@ -12,7 +12,6 @@ public class Prop{
 		this.rotation = rot;
 		this.sprite = new Sprite(resources,0,6,true);
 		this.r = r;
-		this.layer = layer;
 	}
 	
 	/*public void UpdatePosition(float x, float y, float rot){

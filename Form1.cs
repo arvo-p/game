@@ -53,7 +53,7 @@ public partial class Form1 : Form{
 	}
 	protected override void OnPaint(PaintEventArgs e){
        	e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-		Game.draw.Update(e);
+		Game.draw?.Update(e);
 	}
 
 }

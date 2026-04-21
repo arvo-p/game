@@ -1,7 +1,8 @@
 public class Object{
-	protected Environment env;
+	protected Environment env = null!;
 	
 	public bool isSolid = true;
+	public bool isVisible = true;
 
 	public RectangleF r;
 	public float X{get=>r.X;}
@@ -9,12 +10,14 @@ public class Object{
 	public float Width{get=>r.Width;}
 	public float Height{get=>r.Height;}
 	public float speed;
-	public int mass;
+	public int mass=0;
 	protected float friction=0.7f;
 
-	public List<Prop> props = null;
+	public List<Prop>? props = null;
 	protected bool inverted_vectors=false;
 
+	public PointF velRepulsion = new PointF(0,0);
+	
 	float _rotation;
 	public float rotation{
 		set{
@@ -28,14 +31,14 @@ public class Object{
 	public PointF center{
 		get{
 			if(_center == null) PositionUpdated();
-			return _center.Value;
+			return _center!.Value;
 		}
 	}
 
 	public List<CollisionCircle> hitboxes = new List<CollisionCircle>();
 
-	public Sprite _sprite;
-	public Sprite _spriteNext;
+	public Sprite _sprite = null!;
+	public Sprite _spriteNext = null!;
 
 	public virtual Sprite sprite{get => _sprite;}
     public Image image{get => sprite.frame;}
@@ -43,29 +46,29 @@ public class Object{
 	public Object(){
 	}
 	
-	public PointF Scalar2Vect_Speed(float rot, float scalarspeed){
-		double rot_radians = (rot)*0.0174533; 
-		PointF speed = new PointF(
-			(float)(scalarspeed*Math.Cos(rot_radians)),
-			(float)(scalarspeed*Math.Sin(rot_radians))
-		);
-		return speed;
-	}
-
 	public virtual void Update(){
 	}
 
 	public void Collision(Object obj){
 	}
 
+	public PointF movement = new PointF(0, 0);
 	public virtual void UpdateRoutine(){
 		Update();
 	
-		if(speed < 0.2 && speed > -0.2) return;
-		PointF movement = Scalar2Vect_Speed(rotation, speed); 
+		movement = Tools.Scalar2Vect_Speed(rotation, speed); 
 		if(this.inverted_vectors) movement = Tools.SwapPointF(movement);
-		env.Move(this, movement);
-		speed *= (float)(friction);
+		
+		movement.X += velRepulsion.X;
+		movement.Y += velRepulsion.Y;
+
+		if (Math.Abs(movement.X) > 0.1f || Math.Abs(movement.Y) > 0.1f) {
+			env.Move(this, movement);
+		}
+
+		speed *= friction;
+		velRepulsion.X *= friction;
+		velRepulsion.Y *= friction;
 	}
 
 	public virtual void IsHit(float damage, float rotation){
@@ -92,5 +95,16 @@ public class Object{
 			remainingLength -= radius*2;
 			hitboxes.Add(newCC);
 		}
+	}
+
+	public void TransferForce(PointF incomingVelocity, int incomingMass){
+		float targetMass = this.mass > 0 ? this.mass : 50; // Default mass if not set
+		float massRatio = (float)incomingMass / targetMass;
+		
+		// Clamp the ratio to prevent extreme physics glitches
+		massRatio = Math.Clamp(massRatio, 0.1f, 5.0f);
+
+		velRepulsion.X += incomingVelocity.X * massRatio;
+		velRepulsion.Y += incomingVelocity.Y * massRatio;
 	}
 }

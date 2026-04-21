@@ -73,6 +73,14 @@ public class Autoaim{
 			return angA.CompareTo(angB);
 		});
 		
+		// order by angle first and then distance
+		sortedTargets.Sort((a, b) =>
+		{
+			float dist1 = Tools.GetDistanceSquared(parent.r.Location, a.r.Location);
+			float dist2 = Tools.GetDistanceSquared(parent.r.Location, b.r.Location);
+			return dist1.CompareTo(dist2);
+		});
+
 		crosshair.SetPosition(sortedTargets[0].center.X, sortedTargets[0].center.Y);
 		return true;
 	}

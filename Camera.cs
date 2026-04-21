@@ -1,7 +1,7 @@
 public class Camera{
 	
-	Object follow;
-	public RectangleF r{get => follow.r;}
+	public Object? follow;
+	public RectangleF r{get => follow?.r ?? RectangleF.Empty;}
 
 	public Camera(){}
 

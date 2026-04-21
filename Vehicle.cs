@@ -1,6 +1,9 @@
 public class Vehicle : Entity{
 
-	Keyboard mykeyboard;
+	Keyboard? mykeyboard;
+	List<Entity> passengers = new List<Entity>();
+	bool owner = false;
+
 	public float stretchFactor = 1.014f;
 	public float squashFactor = 0.986f;
 	public int isAccelerating = 0;
@@ -16,18 +19,25 @@ public class Vehicle : Entity{
 		
 		_sprite = new Sprite(Resources.Vehicle._car);
 		r.Location = new Point(600, 600);
-		r.Size = new Size((int)(115), (int)(225));
+		r.Size = new Size((int)(100), (int)(200));
 		mass = 900;
 		SetCollisionCircles();
 		setHealth(100);
 
 		props = new List<Prop>();
 		shadow = new Prop(Resources.Vehicle._carshadow, new RectangleF(0, 0, r.Width, r.Height), this.rotation);
-		props.Add(new Prop(Resources.Environments._smoke, new RectangleF(0, 20, 64, 64), this.rotation+90));
+		props.Add(new Prop(Resources.Environments._smoke, new RectangleF(0, 80, 64, 64), this.rotation+90));
 	}
 
 	private void HandleInput(){
+		if(mykeyboard == null) return;
 		mykeyboard.ReadKeys();
+
+		if(mykeyboard.GetKeyOnce(Keys.E)){
+			LeaveCar();
+			return;
+		}
+		if(owner == false) return;
 
 		isTurning = 0;
 		if(Math.Abs(speed) > 1){
@@ -47,10 +57,6 @@ public class Vehicle : Entity{
 				env.Rotate(this, deltarot);
 			}
 		}
-
-		if(mykeyboard.GetKeyOnce(Keys.E)){
-			//LeaveCar();
-		}
 		
 		isAccelerating = 0;
 		if(mykeyboard.GetKey(Keys.Z)){
@@ -65,9 +71,29 @@ public class Vehicle : Entity{
 		speed = Math.Clamp(speed, -maxspeed/2, maxspeed);
 	}
 
-	public void MountPassenger(Entity entity, Keyboard mykeyboard){
-		this.mykeyboard = mykeyboard;
+	public void MountPassenger(Entity entity, Keyboard? mykeyboard){
+		if(passengers.Count() > 4) return;
+		if(mykeyboard != null){
+			this.mykeyboard = mykeyboard;
+			this.owner = true;
+		}
+		this.passengers.Add(entity);
 		Game.camera.Follow(this);
+	}
+
+	private void LeaveCar(){
+		Entity passenger = passengers[0];
+		if(passenger is Player p){
+			p.isKeyboardOn = true;
+			p.inside = null;
+		}
+		env.UpdatePosition(passenger, new PointF(r.X-64-passenger.X, r.Y-64-passenger.Y));
+		Game.camera.Follow(passenger);
+		
+		env.All.Add(passenger);
+		passengers.Remove(passenger);
+		this.owner = false;
+		this.mykeyboard = null;
 	}
 
 	public override void Update(){

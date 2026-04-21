@@ -1,9 +1,8 @@
 public class Sprite{
-	
 	List<Image> frames = new List<Image>();
 	int index=0;
 	int length=0;
-	int slowness=1;
+	int slothFactor=1;
 
 	bool _isInfiniteLoop = true;
 	bool isAnimationTriggered = false;
@@ -18,17 +17,17 @@ public class Sprite{
 			if(length == 0) return frames[0];
 
 			if(isInfiniteLoop == true){
-				index = (index+1)%(length*slowness);
-				return frames[index/slowness];
+				index = (index+1)%(length*slothFactor);
+				return frames[index/slothFactor];
 			}
 			
-			if(isAnimationTriggered == true){
-				if((++index) >= length*slowness-1){
-					isAnimationTriggered = false;
-					_isAnimationFinished = true;
-				}
-				return frames[index/slowness];
-			}else return frames[restingframe_idx];
+			if(isAnimationTriggered == false) return frames[restingframe_idx];
+			else if((++index) >= length*slothFactor-1){
+				isAnimationTriggered = false;
+				_isAnimationFinished = true;
+			}
+
+			return frames[index/slothFactor];
 		}
 	}
 
@@ -40,11 +39,18 @@ public class Sprite{
 		}
 
 		length = frames.Count;
-		if(length < 8) slowness = 1;
-		else if(length <= 5) slowness = 1; 
+		if(length < 8) slothFactor = 1;
+		else if(length <= 5) slothFactor = 1; 
 	}
 
-	public Sprite(string[] filepaths, int restingframe_idx){
+	public Sprite(string pre_filepath){
+		string filepath = Resources.root + "/" + pre_filepath;
+		Image i = Image.FromStream(new MemoryStream(File.ReadAllBytes(filepath)));
+		frames.Add(i);
+		length = 1;
+	}
+
+	public Sprite(string[] filepaths, int restingframe_idx, int slothFactor){
 		this._isInfiniteLoop = false;
 		this.restingframe_idx = restingframe_idx;
 
@@ -55,7 +61,7 @@ public class Sprite{
 		}
 
 		length = frames.Count;
-		if(length < 8) slowness = 4;
+		this.slothFactor = slothFactor;
 		if(restingframe_idx == -1) this.restingframe_idx = length-1;
 	}
 
@@ -70,10 +76,10 @@ public class Sprite{
 		return _imageLibrary[filepath];
 	}
 
-	public Sprite(string[] filepaths, int restingframe_idx, int slowness, bool infinite){
+	public Sprite(string[] filepaths, int restingframe_idx, int slothFactor, bool infinite){
 		this._isInfiniteLoop = infinite;
 		this.restingframe_idx = restingframe_idx;
-		this.slowness = slowness;
+		this.slothFactor = slothFactor;
 
 		foreach(string pre_filepath in filepaths)
 			frames.Add(GetImage(pre_filepath));
@@ -82,16 +88,23 @@ public class Sprite{
 		if(restingframe_idx == -1) this.restingframe_idx = length-1;
 	}
 
+	public void SetFrame(int c){
+    	if(c == -1) index = frames.Count();
+		else index = c;
+	}
+
 	public void Trigger(){
 		_isAnimationFinished = false;
 		index = 0;
 		isAnimationTriggered = true;
 	}
+	
+	public void MatchSlothFactor(Sprite s){
+     	this.slothFactor = s.slothFactor;
+	}
 
 	public void Trigger(Action NextFunction){
-		_isAnimationFinished = false;
-		index = 0;
-		isAnimationTriggered = true;
+		Trigger();
 		while(!isAnimationFinished);
 		NextFunction();
 	}
